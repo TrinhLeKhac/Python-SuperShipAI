@@ -142,7 +142,7 @@ def out_data_api():
         ]].merge(score_final, on=['receiver_province', 'receiver_district', 'carrier'], how='inner')
             .merge(
             ti_le_giao_hang[[
-                'receiver_province', 'receiver_district', 'carrier', 'delivery_success_rate'
+                'receiver_province', 'receiver_district', 'carrier', 'total_order', 'delivery_success_rate'
             ]], on=['receiver_province', 'receiver_district', 'carrier'],
             how='inner'
         )
@@ -168,7 +168,7 @@ def out_data_api():
     api_data_final = api_data_final[[
         'receiver_province_id', 'receiver_province', 'receiver_district_id', 'receiver_district',
         'carrier_id', 'carrier', 'order_type', 'order_type_id', 'carrier_status', 'estimate_delivery_time_details',
-        'estimate_delivery_time', 'delivery_success_rate', 'score', 'stars',
+        'estimate_delivery_time', 'total_order', 'delivery_success_rate', 'score', 'stars',
     ]]
     print('8. Lưu dữ liệu API')
     with open('./output/data_api.json', 'w', encoding='utf-8') as file:
