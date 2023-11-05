@@ -278,7 +278,7 @@ def out_data_final(generate_sample=False):
 
         input_df = input_df[[
             'order_id', 'weight', 'delivery_type', 'sender_province_id', 'sender_district_id',
-            'receiver_district_id', 'receiver_district_id'
+            'receiver_province_id', 'receiver_district_id',
         ]]
 
         assert len(giao_dich_valid) == len(input_df), 'Transform data sai'
