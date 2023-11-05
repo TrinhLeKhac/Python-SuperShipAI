@@ -21,6 +21,32 @@ def round_value(x):
         return '{} - {} ngày'.format(round_05 + 0.5, round_05 + 1)
 
 
+def customer_best_carrier(data_api_df, threshold=15):
+    df1 = data_api_df.loc[data_api_df['total_order'] > threshold]
+    df2 = data_api_df.loc[(data_api_df['total_order'] >= 1) & (data_api_df['total_order'] <= threshold)]
+    df3 = data_api_df.loc[data_api_df['total_order'] == 0]
+
+    group1 = (
+        df1.sort_values(['delivery_success_rate', 'estimate_delivery_time_details'], ascending=[False, False])
+            .drop_duplicates(['receiver_province', 'receiver_district', 'order_type'], keep='first')
+        [['receiver_province', 'receiver_district', 'order_type', 'carrier']]
+            .rename(columns={'carrier': 'customer_best_carrier'})
+    )
+    group2 = (
+        df2.sort_values(['estimate_delivery_time_details', 'delivery_success_rate'], ascending=[False, False])
+            .drop_duplicates(['receiver_province', 'receiver_district', 'order_type'], keep='first')
+        [['receiver_province', 'receiver_district', 'order_type', 'carrier']]
+            .rename(columns={'carrier': 'customer_best_carrier'})
+    )
+    group3 = df3[['receiver_province', 'receiver_district', 'order_type']].drop_duplicates()
+    group3['customer_best_carrier'] = 'Không xác định'
+
+    customer_best_carrier_df = pd.concat([group1, group2, group3]).drop_duplicates(
+        ['receiver_province', 'receiver_district', 'order_type'], keep='first')
+
+    return customer_best_carrier_df
+
+
 def out_data_api():
     print('1. Lấy toàn bộ data')
     (
@@ -164,13 +190,21 @@ def out_data_api():
             }), on=['receiver_province', 'receiver_district'], how='left'
         )
     )
+    print('8. Thông tin customer_best_carrier')
+    customer_best_carrier_df = customer_best_carrier(api_data_final, threshold=15)
+    api_data_final = (
+        api_data_final.merge(
+            customer_best_carrier_df, on=['receiver_province', 'receiver_district', 'order_type'], how='left')
+    )
+    api_data_final['customer_best_carrier'] = api_data_final['customer_best_carrier'].fillna('Không xác định')
+
     api_data_final['order_type_id'] = api_data_final['order_type'].map(MAPPING_ORDER_TYPE_ID)
     api_data_final = api_data_final[[
         'receiver_province_id', 'receiver_province', 'receiver_district_id', 'receiver_district',
         'carrier_id', 'carrier', 'order_type', 'order_type_id', 'carrier_status', 'estimate_delivery_time_details',
-        'estimate_delivery_time', 'total_order', 'delivery_success_rate', 'score', 'stars',
+        'estimate_delivery_time', 'customer_best_carrier', 'total_order', 'delivery_success_rate', 'score', 'stars',
     ]]
-    print('8. Lưu dữ liệu API')
+    print('9. Lưu dữ liệu API')
     with open('./output/data_api.json', 'w', encoding='utf-8') as file:
         api_data_final.to_json(file, force_ascii=False)
 
