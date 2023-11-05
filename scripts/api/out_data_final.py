@@ -280,6 +280,7 @@ def out_data_final(generate_sample=False):
             'order_id', 'weight', 'delivery_type', 'sender_province_id', 'sender_district_id',
             'receiver_province_id', 'receiver_district_id',
         ]]
+        input_df['delivery_type'] = input_df['delivery_type'].fillna('Gửi Bưu Cục')
 
         assert len(giao_dich_valid) == len(input_df), 'Transform data sai'
         print('Số dòng: ', len(input_df))
