@@ -59,12 +59,12 @@ def get_data_province_mapping_district():
 
 PROVINCE_MAPPING_DISTRICT_DF = pd.read_parquet('./processed_data/province_mapping_district.parquet')
 
-active_nvc_df = pd.DataFrame(data={'nvc': ACTIVE_NVC})
-PROVINCE_MAPPING_DISTRICT_CROSS_NVC_DF = (
+active_carrier_df = pd.DataFrame(data={'carrier': ACTIVE_CARRIER})
+PROVINCE_MAPPING_DISTRICT_CROSS_CARRIER_DF = (
     PROVINCE_MAPPING_DISTRICT_DF[['province', 'district']].rename(columns={
         'province': 'receiver_province',
         'district': 'receiver_district'
-    }).merge(active_nvc_df, how='cross')
+    }).merge(active_carrier_df, how='cross')
 )
 
 with open('./processed_data/province_mapping_district_from_api.json') as file:

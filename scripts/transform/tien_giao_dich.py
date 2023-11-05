@@ -13,16 +13,16 @@ def transform_data_tien_giao_dich():
     ])]
 
     cuoc_phi_giao_dich = giao_dich_valid[[
-        'order_id', 'receiver_province', 'receiver_district', 'nvc',
+        'order_id', 'receiver_province', 'receiver_district', 'carrier',
         'weight', 'delivery_type', 'order_type'
     ]]
 
     # 2. Cước phí nhà vận chuyển
-    cuoc_phi_df = pd.read_parquet('./processed_data/cuoc_phi_nvc.parquet')
-    cuoc_phi_df = cuoc_phi_df[['nvc', 'order_type', 'gt', 'lt_or_eq', 'service_fee']]
+    cuoc_phi_df = pd.read_parquet('./processed_data/cuoc_phi.parquet')
+    cuoc_phi_df = cuoc_phi_df[['carrier', 'order_type', 'gt', 'lt_or_eq', 'service_fee']]
 
     # 3. Tổng hợp
-    cuoc_phi_giao_dich_full = cuoc_phi_giao_dich.merge(cuoc_phi_df, on=['nvc', 'order_type'], how='inner')
+    cuoc_phi_giao_dich_full = cuoc_phi_giao_dich.merge(cuoc_phi_df, on=['carrier', 'order_type'], how='inner')
     cuoc_phi_giao_dich_full = cuoc_phi_giao_dich_full.loc[
         (cuoc_phi_giao_dich_full['weight'] > cuoc_phi_giao_dich_full['gt']) &
         (cuoc_phi_giao_dich_full['weight'] <= cuoc_phi_giao_dich_full['lt_or_eq'])
@@ -30,14 +30,14 @@ def transform_data_tien_giao_dich():
 
     # Ninja Van lấy tận nơi cộng cước phí 1,500
     cuoc_phi_giao_dich_full.loc[
-        cuoc_phi_giao_dich_full['nvc'].isin(['Ninja Van']) &
+        cuoc_phi_giao_dich_full['carrier'].isin(['Ninja Van']) &
         cuoc_phi_giao_dich_full['delivery_type'].isin(['Lấy Tận Nơi']),
         'service_fee'
     ] = cuoc_phi_giao_dich_full['service_fee'] + 1500
 
     # GHN lấy tận nơi cộng cước phí 1,000
     cuoc_phi_giao_dich_full.loc[
-        cuoc_phi_giao_dich_full['nvc'].isin(['GHN']) &
+        cuoc_phi_giao_dich_full['carrier'].isin(['GHN']) &
         cuoc_phi_giao_dich_full['delivery_type'].isin(['Lấy Tận Nơi']),
         'service_fee'
     ] = cuoc_phi_giao_dich_full['service_fee'] + 1000

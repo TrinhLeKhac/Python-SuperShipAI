@@ -22,7 +22,7 @@ def xu_ly_phan_vung_nha_van_chuyen():
         'ghn_outer_region': 'outer_region',
         'ghn_inner_region': 'inner_region'
     })
-    ghn['nvc'] = 'GHN'
+    ghn['carrier'] = 'GHN'
 
     njv = phan_vung_nvc[[
         'receiver_province', 'receiver_district',
@@ -30,7 +30,7 @@ def xu_ly_phan_vung_nha_van_chuyen():
         'njv_outer_region': 'outer_region',
         'njv_inner_region': 'inner_region'
     })
-    njv['nvc'] = 'Ninja Van'
+    njv['carrier'] = 'Ninja Van'
 
     vtp = phan_vung_nvc[[
         'receiver_province', 'receiver_district',
@@ -38,7 +38,7 @@ def xu_ly_phan_vung_nha_van_chuyen():
         'vtp_outer_region': 'outer_region',
         'vtp_inner_region': 'inner_region'
     })
-    vtp['nvc'] = 'Viettel Post'
+    vtp['carrier'] = 'Viettel Post'
 
     spx = phan_vung_nvc[[
         'receiver_province', 'receiver_district',
@@ -46,7 +46,7 @@ def xu_ly_phan_vung_nha_van_chuyen():
         'spx_outer_region': 'outer_region',
         'spx_inner_region': 'inner_region'
     })
-    spx['nvc'] = 'SPX Express'
+    spx['carrier'] = 'SPX Express'
 
     best = phan_vung_nvc[[
         'receiver_province', 'receiver_district',
@@ -54,7 +54,7 @@ def xu_ly_phan_vung_nha_van_chuyen():
         'best_outer_region': 'outer_region',
         'best_inner_region': 'inner_region'
     })
-    best['nvc'] = 'BEST Express'
+    best['carrier'] = 'BEST Express'
 
     ghtk = phan_vung_nvc[[
         'receiver_province', 'receiver_district',
@@ -62,11 +62,11 @@ def xu_ly_phan_vung_nha_van_chuyen():
         'ghtk_outer_region': 'outer_region',
         'ghtk_inner_region': 'inner_region'
     })
-    ghtk['nvc'] = 'GHTK'
+    ghtk['carrier'] = 'GHTK'
 
     phan_vung_nvc_final = pd.concat([ghn, njv, vtp, spx, best, ghtk], ignore_index=True)
     phan_vung_nvc_final = phan_vung_nvc_final[
-        ['nvc', 'receiver_province', 'receiver_district', 'outer_region', 'inner_region']]
+        ['carrier', 'receiver_province', 'receiver_district', 'outer_region', 'inner_region']]
     phan_vung_nvc_final['inner_region'] = phan_vung_nvc_final['inner_region'].map({
         'Nội thành': 'Nội Thành',
         'Ngoại thành': 'Ngoại Thành'
@@ -80,9 +80,9 @@ def xu_ly_phan_vung_nha_van_chuyen():
     ]
 
     # 4. Check tên nhà vận chuyển đã được chuẩn hóa chưa
-    set_nvc = set(phan_vung_nvc_final['nvc'].unique().tolist())
-    set_norm_full_nvc = set(MAPPING_NVC_ID.keys())
-    assert set_nvc - set_norm_full_nvc == set(), 'Ops, Tên nhà vận chuyển chưa được chuẩn hóa'
+    set_carrier = set(phan_vung_nvc_final['carrier'].unique().tolist())
+    set_norm_full_carrier = set(MAPPING_CARRIER_ID.keys())
+    assert set_carrier - set_norm_full_carrier == set(), 'Ops, Tên nhà vận chuyển chưa được chuẩn hóa'
 
     # 5. Lưu thông tin
     phan_vung_nvc_final.to_parquet('./processed_data/phan_vung_nvc.parquet', index=False)

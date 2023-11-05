@@ -1,6 +1,6 @@
 from scripts.utilities.streamlit_helper import *
 from scripts.processing.total_processing import total_processing
-from scripts.api.generate_data_api import *
+from scripts.api.out_data_api import *
 
 st.title("Tối ưu vận chuyển (SuperShipAI)")
 

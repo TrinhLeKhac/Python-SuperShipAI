@@ -147,8 +147,6 @@ def out_data_api():
     api_data_final = api_data_final.merge(qua_tai, on=['receiver_province', 'receiver_district', 'nvc'], how='left')
     api_data_final['status'] = api_data_final['status'].fillna('Bình thường')
 
-
-
     print('8. Lưu dữ liệu API')
     with open('./output/data_api.json', 'w', encoding='utf-8') as file:
         api_data_final.to_json(file, force_ascii=False)

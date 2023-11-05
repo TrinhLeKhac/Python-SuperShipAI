@@ -29,12 +29,12 @@ def xu_ly_ngung_giao_nhan():
         value_vars=[
             'Ninja Van', 'GHN', 'BEST Express', 'SPX Express', 'GHTK', 'Viettel Post'
         ],
-        var_name='nvc', value_name='status'
+        var_name='carrier', value_name='status'
     )
 
-    set_nvc = set(ngung_giao_nhan_final_df['nvc'].unique().tolist())
-    set_norm_full_nvc = set(MAPPING_NVC_ID.keys())
-    assert set_nvc - set_norm_full_nvc == set(), 'Ops, Tên nhà vận chuyển chưa được chuẩn hóa'
+    set_carrier = set(ngung_giao_nhan_final_df['carrier'].unique().tolist())
+    set_norm_full_carrier = set(MAPPING_CARRIER_ID.keys())
+    assert set_carrier - set_norm_full_carrier == set(), 'Ops, Tên nhà vận chuyển chưa được chuẩn hóa'
 
     # Lưu thông tin
     ngung_giao_nhan_final_df.to_parquet('./processed_data/ngung_giao_nhan.parquet', index=False)

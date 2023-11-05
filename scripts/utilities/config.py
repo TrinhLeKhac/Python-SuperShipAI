@@ -219,8 +219,8 @@ MAPPING_TIEU_CHI_ID = {
     'Có kho giao nhận': 6,  
 }
 
-ACTIVE_NVC = ['GHTK', 'GHN', 'Viettel Post', 'BEST Express', 'Ninja Van', 'SPX Express']
-MAPPING_NVC_ID = {
+ACTIVE_CARRIER = ['GHTK', 'GHN', 'Viettel Post', 'BEST Express', 'Ninja Van', 'SPX Express']
+MAPPING_CARRIER_ID = {
     'GHTK': 1,
     'GHN': 2,
     'J&T Express': 3,
@@ -235,7 +235,7 @@ MAPPING_NVC_ID = {
     'TikiNOW Smart Logistics': 12,
 }
 
-MAPPING_ID_NVC = {}
-for nvc, id in MAPPING_NVC_ID.items():
-    MAPPING_ID_NVC[id] = nvc
+MAPPING_ID_CARRIER = {}
+for nvc, id in MAPPING_CARRIER_ID.items():
+    MAPPING_ID_CARRIER[id] = nvc
 

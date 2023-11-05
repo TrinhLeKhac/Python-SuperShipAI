@@ -154,16 +154,16 @@ def transform_data_thoi_gian_giao_hang_toan_trinh():
     ])]
 
     giao_dich_thanh_cong = giao_dich_thanh_cong.loc[
-        giao_dich_thanh_cong['finished_at'].notna() & giao_dich_thanh_cong['created_at'].notna()]
+        giao_dich_thanh_cong['finished_at'].notna() & giao_dich_thanh_cong['carrier_created_at'].notna()]
     giao_dich_thanh_cong['delivery_time_h'] = (giao_dich_thanh_cong['finished_at'] - giao_dich_thanh_cong[
-        'created_at']).dt.total_seconds() / 60 / 60
+        'carrier_created_at']).dt.total_seconds() / 60 / 60
 
     # Transform bảng
     giao_dich_thanh_cong_agg = (
         giao_dich_thanh_cong
-            .groupby(['receiver_province', 'receiver_district', 'nvc', 'order_type'])
-            .agg(total_order=('delivery_time_h', 'count'), delivery_time_mean_h=('delivery_time_h', 'mean'))
-            .reset_index()
+        .groupby(['receiver_province', 'receiver_district', 'carrier', 'order_type'])
+        .agg(total_order=('delivery_time_h', 'count'), delivery_time_mean_h=('delivery_time_h', 'mean'))
+        .reset_index()
     )
 
     giao_dich_thanh_cong_agg['status'] = (
@@ -173,7 +173,7 @@ def transform_data_thoi_gian_giao_hang_toan_trinh():
     )
 
     cross_df = (
-        PROVINCE_MAPPING_DISTRICT_CROSS_NVC_DF.merge(
+        PROVINCE_MAPPING_DISTRICT_CROSS_CARRIER_DF.merge(
             pd.DataFrame(
                 data={'order_type': [
                     'Nội Thành Tỉnh', 'Ngoại Thành Tỉnh',
@@ -186,7 +186,7 @@ def transform_data_thoi_gian_giao_hang_toan_trinh():
     giao_dich_thanh_cong_agg = (
         cross_df.merge(
             giao_dich_thanh_cong_agg,
-            on=['receiver_province', 'receiver_district', 'nvc', 'order_type'], how='left'
+            on=['receiver_province', 'receiver_district', 'carrier', 'order_type'], how='left'
         )
     )
 
@@ -199,13 +199,13 @@ def transform_data_thoi_gian_giao_hang_toan_trinh():
             lambda x: TRONG_SO['Thời gian giao hàng']['Phân loại'][x['order_type']][x['status']], axis=1
         )
     )
-    giao_dich_thanh_cong_agg['tieu_chi'] = 'Thời gian giao hàng'
-    giao_dich_thanh_cong_agg['trong_so'] = TRONG_SO['Thời gian giao hàng']['Tiêu chí']
+    giao_dich_thanh_cong_agg['criteria'] = 'Thời gian giao hàng'
+    giao_dich_thanh_cong_agg['criteria_weight'] = TRONG_SO['Thời gian giao hàng']['Tiêu chí']
 
     giao_dich_thanh_cong_agg = giao_dich_thanh_cong_agg[[
-        'receiver_province', 'receiver_district', 'nvc', 'order_type',
+        'receiver_province', 'receiver_district', 'carrier', 'order_type',
         'total_order', 'delivery_time_mean_h', 'status',
-        'score', 'tieu_chi', 'trong_so',
+        'score', 'criteria', 'criteria_weight',
     ]]
 
     # Check data thời gian giao hàng toàn trình
