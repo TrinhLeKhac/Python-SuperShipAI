@@ -254,10 +254,10 @@ def out_data_final(generate_sample=False):
     if generate_sample:
         input_df = generate_sample_input(n_rows=10_000)
     else:
-        giao_dich_valid = pd.read.parquet('./processed_data/giao_dich_combine_valid.parquet')
+        giao_dich_valid = pd.read_parquet('./processed_data/giao_dich_combine_valid.parquet')
         giao_dich_valid = giao_dich_valid[[
             'order_id', 'weight', 'delivery_type', 'sender_province', 'sender_district',
-            'receiver_district', 'receiver_district'
+            'receiver_province', 'receiver_district'
         ]]
         input_df = (
             giao_dich_valid.merge(
@@ -267,19 +267,22 @@ def out_data_final(generate_sample=False):
                     'province': 'sender_province',
                     'district': 'sender_district'
                 }), on=['sender_province', 'sender_district'], how='left')
-                .merge(
+            .merge(
                 PROVINCE_MAPPING_DISTRICT_DF.rename(columns={
                     'province_id': 'receiver_province_id',
                     'district_id': 'receiver_district_id',
                     'province': 'receiver_province',
-                    'district': 'receiver_district'
-                }), on=['receiver_province_id', 'receiver_district_id'], how='left')
+                    'district': 'receiver_district',
+                }), on=['receiver_province', 'receiver_district'], how='left')
         )
+
         input_df = input_df[[
             'order_id', 'weight', 'delivery_type', 'sender_province_id', 'sender_district_id',
             'receiver_district_id', 'receiver_district_id'
         ]]
+
         assert len(giao_dich_valid) == len(input_df), 'Transform data sai'
+        print('Số dòng: ', len(input_df))
 
     tmp_df1 = generate_order_type(input_df)
     assert len(tmp_df1) == len(input_df) * len(ACTIVE_CARRIER), 'Transform data sai'
