@@ -21,6 +21,37 @@ def round_value(x):
         return '{} - {} ngày'.format(round_05 + 0.5, round_05 + 1)
 
 
+def type_of_system_delivery(s):
+    if (s['sender_province'] in ['Thành phố Hồ Chí Minh', 'Thành phố Hà Nội', 'Thành phố Đà Nẵng']) \
+            & (s['receiver_province'] in ['Thành phố Hồ Chí Minh', 'Thành phố Hà Nội', 'Thành phố Đà Nẵng']) \
+            & (s['sender_province'] != s['receiver_province']):
+        return 'Liên Miền Đặc Biệt'
+    # elif ((s['sender_outer_region'] == 'Miền Bắc') & (s['receiver_outer_region'] == 'Miền Nam')) \
+    #         | ((s['sender_outer_region'] == 'Miền Nam') & (s['receiver_outer_region'] == 'Miền Bắc')):
+    #     return 'Liên Miền'
+    # elif ((s['sender_outer_region'] == 'Miền Bắc') & (s['receiver_outer_region'] == 'Miền Trung')) \
+    #         | ((s['sender_outer_region'] == 'Miền Trung') & (s['receiver_outer_region'] == 'Miền Nam')) \
+    #         | ((s['sender_outer_region'] == 'Miền Trung') & (s['receiver_outer_region'] == 'Miền Bắc')) \
+    #         | ((s['sender_outer_region'] == 'Miền Nam') & (s['receiver_outer_region'] == 'Miền Trung')):
+    #     return 'Liên Miền'
+    elif s['sender_outer_region'] != s['receiver_outer_region']:
+        return 'Liên Miền'
+    elif s['sender_province'] != s['receiver_province']:
+        return 'Nội Miền'
+    elif (s['receiver_inner_region'] == 'Nội Thành') \
+            & (s['receiver_province'] in ['Thành phố Hồ Chí Minh', 'Thành phố Hà Nội']):
+        return 'Nội Thành Tp.HCM - HN'
+    elif (s['receiver_inner_region'] == 'Nội Thành') \
+            & (s['receiver_province'] not in ['Thành phố Hồ Chí Minh', 'Thành phố Hà Nội']):
+        return 'Nội Thành Tỉnh'
+    elif (s['receiver_inner_region'] == 'Ngoại Thành') \
+            & (s['receiver_province'] in ['Thành phố Hồ Chí Minh', 'Thành phố Hà Nội']):
+        return 'Ngoại Thành Tp.HCM - HN'
+    elif (s['receiver_inner_region'] == 'Ngoại Thành') \
+            & (s['receiver_province'] not in ['Thành phố Hồ Chí Minh', 'Thành phố Hà Nội']):
+        return 'Ngoại Thành Tỉnh'
+
+
 def out_data_api():
     print('1. Lấy toàn bộ data')
     (
@@ -58,9 +89,9 @@ def out_data_api():
 
     qua_tai = (
         qua_tai
-        .groupby(['receiver_province', 'receiver_district', 'carrier'])
+            .groupby(['receiver_province', 'receiver_district', 'carrier'])
         ['carrier_status'].apply(lambda x: ' + '.join(x))
-        .reset_index()
+            .reset_index()
     )
 
     print('3. Xử lý data thời gian giao dịch')
@@ -83,7 +114,7 @@ def out_data_api():
             'province': 'receiver_province',
             'district': 'receiver_district',
         })
-        .merge(
+            .merge(
             active_carrier_df.merge(loai_van_chuyen_df, how='cross'),
             how='cross'
         )
@@ -140,7 +171,7 @@ def out_data_api():
             'receiver_province', 'receiver_district', 'carrier', 'order_type',
             'estimate_delivery_time', 'estimate_delivery_time_details',
         ]].merge(score_final, on=['receiver_province', 'receiver_district', 'carrier'], how='inner')
-        .merge(
+            .merge(
             ti_le_giao_hang[[
                 'receiver_province', 'receiver_district', 'carrier', 'delivery_success_rate'
             ]], on=['receiver_province', 'receiver_district', 'carrier'],
