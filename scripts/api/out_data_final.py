@@ -156,7 +156,7 @@ def combine_info_from_api(input_df):
             api_data_final[[
                 'receiver_province_id', 'receiver_district_id', 'carrier_id', 'order_type_id',
                 'carrier_status', 'estimate_delivery_time_details', 'estimate_delivery_time',
-                'customer_best_carrier', 'delivery_success_rate', 'score', 'stars',
+                'customer_best_carrier', 'delivery_success_rate', 'score', 'stars', 'total_order',
             ]], on=['receiver_province_id', 'receiver_district_id', 'carrier_id', 'order_type_id'], how='left'
         )
     )
@@ -222,11 +222,37 @@ def calculate_notification(input_df):
     ], ignore_index=True)
 
 
+def partner_best_carrier(data_api_df, threshold=15):
+    df1 = data_api_df.loc[data_api_df['total_order'] > threshold]
+    df2 = data_api_df.loc[(data_api_df['total_order'] >= 1) & (data_api_df['total_order'] <= threshold)]
+    df3 = data_api_df.loc[data_api_df['total_order'] == 0]
+
+    group1 = (
+        df1.sort_values(['service_fee', 'delivery_success_rate'], ascending=[False, False])
+            .drop_duplicates(['receiver_province', 'receiver_district', 'order_type'], keep='first')
+        [['receiver_province', 'receiver_district', 'order_type', 'carrier']]
+            .rename(columns={'carrier': 'partner_best_carrier'})
+    )
+    group2 = (
+        df2.sort_values(['delivery_success_rate', 'service_fee'], ascending=[False, False])
+            .drop_duplicates(['receiver_province', 'receiver_district', 'order_type'], keep='first')
+        [['receiver_province', 'receiver_district', 'order_type', 'carrier']]
+            .rename(columns={'carrier': 'partner_best_carrier'})
+    )
+    group3 = df3[['receiver_province', 'receiver_district', 'order_type']].drop_duplicates()
+    group3['partner_best_carrier'] = PARTNER_BEST_CARRIER_DEFAULT
+
+    partner_best_carrier_df = pd.concat([group1, group2, group3]).drop_duplicates(
+        ['receiver_province', 'receiver_district', 'order_type'], keep='first')
+
+    return partner_best_carrier_df
+
+
 def out_data_final(generate_sample=False):
     if generate_sample:
         input_df = generate_sample_input(n_rows=10_000)
     else:
-        giao_dich_valid = pd.readtparquet('./processed_data/giao_dich_combine_valid.parquet')
+        giao_dich_valid = pd.read.parquet('./processed_data/giao_dich_combine_valid.parquet')
         giao_dich_valid = giao_dich_valid[[
             'order_id', 'weight', 'delivery_type', 'sender_province', 'sender_district',
             'receiver_district', 'receiver_district'
@@ -239,7 +265,7 @@ def out_data_final(generate_sample=False):
                     'province': 'sender_province',
                     'district': 'sender_district'
                 }), on=['sender_province', 'sender_district'], how='left')
-            .merge(
+                .merge(
                 PROVINCE_MAPPING_DISTRICT_DF.rename(columns={
                     'province_id': 'receiver_province_id',
                     'district_id': 'receiver_district_id',
@@ -254,9 +280,46 @@ def out_data_final(generate_sample=False):
         assert len(giao_dich_valid) == len(input_df), 'Transform data sai'
 
     tmp_df1 = generate_order_type(input_df)
+    assert len(tmp_df1) == len(input_df) * len(ACTIVE_CARRIER), 'Transform data sai'
+
     tmp_df2 = combine_info_from_api(tmp_df1)
+    assert len(tmp_df2) == len(tmp_df1), 'Transform data sai'
+
     tmp_df3 = calculate_service_fee(tmp_df2)
+    assert len(tmp_df3) == len(tmp_df2), 'Transform data sai'
+
     tmp_df4 = calculate_notification(tmp_df3)
+    assert len(tmp_df4) == len(tmp_df3), 'Transform data sai'
+
+    partner_best_carrier_df = partner_best_carrier(tmp_df4)
+
+    final_df = (
+        tmp_df4.merge(
+            partner_best_carrier_df,
+            on=['receiver_province', 'receiver_district', 'order_type'],
+            how='inner'
+        )
+    )
+    assert len(final_df) == len(tmp_df4), 'Transform data sai'
+
+    final_df = final_df[[
+        'order_id',
+        'sender_province_id', 'sender_province', 'sender_district_id', 'sender_district',
+        'receiver_province_id', 'receiver_province', 'receiver_district_id', 'receiver_district',
+        'carrier_id', 'carrier', 'order_type', 'order_type_id', 'sys_order_type_id',
+        'weight', 'service_fee', 'delivery_type',
+        'carrier_status', 'estimate_delivery_time_details', 'estimate_delivery_time', 'delivery_success_rate',
+        'customer_best_carrier', 'partner_best_carrier', 'score', 'stars', 'notification',
+    ]]
+
+    if generate_sample:
+        return final_df
+    else:
+        final_df.to_parquet('./output/data_final.parquet')
+        # print('Lưu dữ liệu respone request')
+        # with open('./output/data_final_respone_request.json', 'w', encoding='utf-8') as file:
+        #     final_df.to_json(file, force_ascii=False)
+
     print('>>> Done\n')
     print('-' * 100)
 
