@@ -219,6 +219,16 @@ MAPPING_TIEU_CHI_ID = {
     'Có kho giao nhận': 6,  
 }
 
+MAPPING_ORDER_TYPE_ID = {
+    'Nội Thành Tỉnh': 1,
+    'Ngoại Thành Tỉnh': 2,
+    'Nội Thành Tp.HCM - HN': 3,
+    'Ngoại Thành Tp.HCM - HN': 4,
+    'Nội Miền': 5,
+    'Cận Miền': 6,
+    'Cách Miền': 7,
+}
+
 OVERLOADING_SCORE_DICT = {
     'Ngưng giao nhận': [-10],
     'Đánh giá ZNS': [-8, -10],

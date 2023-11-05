@@ -190,7 +190,8 @@ def combine_full_data():
     full_information_df = (
         tien_giao_dich[[
             'order_id', 'receiver_province', 'receiver_district',
-            'carrier', 'order_type', 'sys_order_type', 'weight', 'service_fee'
+            'carrier', 'order_type', 'order_type_id', 'sys_order_type_id',
+            'weight', 'service_fee',
         ]].merge(
             api_data_final,
             on=['receiver_province', 'receiver_district', 'carrier', 'order_type'],

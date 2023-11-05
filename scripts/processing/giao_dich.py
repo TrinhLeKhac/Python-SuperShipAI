@@ -235,13 +235,14 @@ def tong_hop_thong_tin_giao_dich():
             }), on=['carrier', 'receiver_province', 'receiver_district'], how='left')
     )
     giao_dich_valid['order_type'] = giao_dich_valid.apply(type_of_delivery, axis=1)
-    giao_dich_valid['sys_order_type'] = giao_dich_valid.apply(type_of_system_delivery, axis=1)
+    giao_dich_valid['order_type_id'] = giao_dich_valid['order_type'].map(MAPPING_ORDER_TYPE_ID)
+    giao_dich_valid['sys_order_type_id'] = giao_dich_valid.apply(type_of_system_delivery, axis=1)
 
     giao_dich_valid = giao_dich_valid[[
         'carrier_created_at', 'order_id', 'carrier', 'weight',
         'sender_province', 'sender_district',
         'receiver_province', 'receiver_district',
-        'order_status', 'order_type', 'sys_order_type',
+        'order_status', 'order_type', 'order_type_id', 'sys_order_type_id',
         'n_deliveries', 'delivery_type',
         'is_returned', 'finished_at',
     ]]

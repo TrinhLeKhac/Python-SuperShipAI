@@ -14,7 +14,7 @@ def transform_data_tien_giao_dich():
 
     cuoc_phi_giao_dich = giao_dich_valid[[
         'order_id', 'receiver_province', 'receiver_district', 'carrier',
-        'weight', 'delivery_type', 'order_type', 'sys_order_type',
+        'weight', 'delivery_type', 'order_type', 'order_type_id', 'sys_order_type_id',
     ]]
 
     # 2. Cước phí nhà vận chuyển
