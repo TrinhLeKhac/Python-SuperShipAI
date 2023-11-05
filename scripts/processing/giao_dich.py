@@ -82,7 +82,7 @@ def type_of_system_delivery(s):
         return 4
     elif s['sender_province'] == s['receiver_province']:
         return 5
-    elif (s['sender_outer_region'] == s['receiver_outer_region']) & (s['sender_province'] != s['receiver_province']):
+    elif s['sender_outer_region'] == s['receiver_outer_region']:
         return 6
     elif ((s['sender_outer_region'] == 'Miền Bắc') & (s['receiver_outer_region'] in ['Miền Trung', 'Miền Nam'])) \
         | ((s['sender_outer_region'] == 'Miền Trung') & (s['receiver_outer_region'] in ['Miền Bắc', 'Miền Nam'])) \
