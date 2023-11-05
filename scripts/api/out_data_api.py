@@ -195,7 +195,7 @@ def combine_full_data():
             'weight', 'service_fee',
         ]].merge(
             api_data_final,
-            on=['receiver_province', 'receiver_district', 'carrier', 'order_type'],
+            on=['receiver_province', 'receiver_district', 'carrier', 'order_type', 'order_type_id'],
             how='left'
         )
     )
