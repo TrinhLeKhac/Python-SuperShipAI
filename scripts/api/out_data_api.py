@@ -164,9 +164,10 @@ def out_data_api():
             }), on=['receiver_province', 'receiver_district'], how='left'
         )
     )
+    api_data_final['order_type_id'] = api_data_final['order_type'].map(MAPPING_ORDER_TYPE_ID)
     api_data_final = api_data_final[[
         'receiver_province_id', 'receiver_province', 'receiver_district_id', 'receiver_district',
-        'carrier_id', 'carrier', 'order_type', 'carrier_status', 'estimate_delivery_time_details',
+        'carrier_id', 'carrier', 'order_type', 'order_type_id', 'carrier_status', 'estimate_delivery_time_details',
         'estimate_delivery_time', 'delivery_success_rate', 'score', 'stars',
     ]]
     print('8. Lưu dữ liệu API')
@@ -235,7 +236,7 @@ def combine_full_data():
     full_information_df = full_information_df[[
         'order_id',
         'receiver_province_id', 'receiver_province', 'receiver_district_id', 'receiver_district',
-        'carrier_id', 'carrier', 'order_type', 'sys_order_type',
+        'carrier_id', 'carrier', 'order_type', 'order_type_id', 'sys_order_type_id',
         'weight', 'service_fee', 'carrier_status',
         'estimate_delivery_time_details', 'estimate_delivery_time', 'delivery_success_rate',
         'score', 'stars', 'notification',
