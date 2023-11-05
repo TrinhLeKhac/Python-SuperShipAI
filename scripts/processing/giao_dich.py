@@ -57,6 +57,37 @@ def type_of_delivery(s):
         return 'Ngoại Thành Tỉnh'
 
 
+def type_of_system_delivery(s):
+    if (s['sender_province'] in ['Thành phố Hồ Chí Minh', 'Thành phố Hà Nội', 'Thành phố Đà Nẵng']) \
+            & (s['receiver_province'] in ['Thành phố Hồ Chí Minh', 'Thành phố Hà Nội', 'Thành phố Đà Nẵng']) \
+            & (s['sender_province'] != s['receiver_province']):
+        return 'Liên Miền Đặc Biệt'
+    # elif ((s['sender_outer_region'] == 'Miền Bắc') & (s['receiver_outer_region'] == 'Miền Nam')) \
+    #         | ((s['sender_outer_region'] == 'Miền Nam') & (s['receiver_outer_region'] == 'Miền Bắc')):
+    #     return 'Liên Miền'
+    # elif ((s['sender_outer_region'] == 'Miền Bắc') & (s['receiver_outer_region'] == 'Miền Trung')) \
+    #         | ((s['sender_outer_region'] == 'Miền Trung') & (s['receiver_outer_region'] == 'Miền Nam')) \
+    #         | ((s['sender_outer_region'] == 'Miền Trung') & (s['receiver_outer_region'] == 'Miền Bắc')) \
+    #         | ((s['sender_outer_region'] == 'Miền Nam') & (s['receiver_outer_region'] == 'Miền Trung')):
+    #     return 'Liên Miền'
+    elif s['sender_outer_region'] != s['receiver_outer_region']:
+        return 'Liên Miền'
+    elif s['sender_province'] != s['receiver_province']:
+        return 'Nội Miền'
+    elif (s['receiver_inner_region'] == 'Nội Thành') \
+            & (s['receiver_province'] in ['Thành phố Hồ Chí Minh', 'Thành phố Hà Nội']):
+        return 'Nội Thành Tp.HCM - HN'
+    elif (s['receiver_inner_region'] == 'Nội Thành') \
+            & (s['receiver_province'] not in ['Thành phố Hồ Chí Minh', 'Thành phố Hà Nội']):
+        return 'Nội Thành Tỉnh'
+    elif (s['receiver_inner_region'] == 'Ngoại Thành') \
+            & (s['receiver_province'] in ['Thành phố Hồ Chí Minh', 'Thành phố Hà Nội']):
+        return 'Ngoại Thành Tp.HCM - HN'
+    elif (s['receiver_inner_region'] == 'Ngoại Thành') \
+            & (s['receiver_province'] not in ['Thành phố Hồ Chí Minh', 'Thành phố Hà Nội']):
+        return 'Ngoại Thành Tỉnh'
+
+
 def xu_ly_giao_dich():
     print('Xử lý giao dịch BEST Express...')
     best_df = pd.read_excel('./input/Giao Dịch Nhà Vận Chuyển.xlsx', sheet_name='BEST')
@@ -201,15 +232,16 @@ def tong_hop_thong_tin_giao_dich():
             phan_vung_nvc.rename(columns={
                 'outer_region': 'receiver_outer_region',
                 'inner_region': 'receiver_inner_region',
-        }), on=['carrier', 'receiver_province', 'receiver_district'], how='left')
+            }), on=['carrier', 'receiver_province', 'receiver_district'], how='left')
     )
     giao_dich_valid['order_type'] = giao_dich_valid.apply(type_of_delivery, axis=1)
+    giao_dich_valid['sys_order_type'] = giao_dich_valid.apply(type_of_system_delivery, axis=1)
 
     giao_dich_valid = giao_dich_valid[[
         'carrier_created_at', 'order_id', 'carrier', 'weight',
         'sender_province', 'sender_district',
         'receiver_province', 'receiver_district',
-        'order_status', 'order_type',
+        'order_status', 'order_type', 'sys_order_type',
         'n_deliveries', 'delivery_type',
         'is_returned', 'finished_at',
     ]]
