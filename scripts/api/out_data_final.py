@@ -221,6 +221,8 @@ def calculate_notification(input_df):
         remain_df3
     ], ignore_index=True)
 
+    return result_df
+
 
 def partner_best_carrier(data_api_df, threshold=15):
     df1 = data_api_df.loc[data_api_df['total_order'] > threshold]
