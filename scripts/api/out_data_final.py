@@ -222,7 +222,7 @@ def calculate_notification(input_df):
     ], ignore_index=True)
 
 
-def total_calculate(generate_sample=False):
+def out_data_final(generate_sample=False):
     if generate_sample:
         input_df = generate_sample_input(n_rows=10_000)
     else:
@@ -262,4 +262,4 @@ def total_calculate(generate_sample=False):
 
 
 if __name__ == '__main__':
-    total_calculate()
+    out_data_final()
