@@ -191,15 +191,14 @@ def combine_full_data():
     full_information_df = (
         tien_giao_dich[[
             'order_id', 'receiver_province', 'receiver_district',
-            'carrier', 'order_type', 'order_type_id', 'sys_order_type_id',
+            'carrier', 'order_type', 'sys_order_type_id',
             'weight', 'service_fee',
         ]].merge(
             api_data_final,
-            on=['receiver_province', 'receiver_district', 'carrier', 'order_type', 'order_type_id'],
+            on=['receiver_province', 'receiver_district', 'carrier', 'order_type'],
             how='left'
         )
     )
-    full_information_df['carrier_id'] = full_information_df['carrier'].map(MAPPING_CARRIER_ID)
     assert len(full_information_df) == len(tien_giao_dich), 'Transform data không chính xác'
 
     print('2. Tính toán notification')
