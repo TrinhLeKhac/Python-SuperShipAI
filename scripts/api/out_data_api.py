@@ -53,7 +53,7 @@ def out_data_api():
         ngung_giao_nhan, danh_gia_zns,
         ti_le_giao_hang, chat_luong_noi_bo,
         thoi_gian_giao_hang, kho_giao_nhan,
-        tien_giao_dich
+        # tien_giao_dich
     ) = total_transform()
 
     print('2. Tính toán quận huyện quá tải')
@@ -214,74 +214,5 @@ def out_data_api():
     print('-' * 100)
 
 
-def combine_full_data():
-    # Lấy toàn bộ data output API join với data giao dịch có khối lượng
-    # để tunning score, check lỗi
-
-    print('1. Đọc thông tin data API + giao dịch có khối lượng')
-    api_data_final = pd.read_parquet('./output/data_api.parquet')
-    _, _, _, _, _, _, tien_giao_dich = total_transform()
-
-    full_information_df = (
-        tien_giao_dich[[
-            'order_id', 'receiver_province', 'receiver_district',
-            'carrier', 'order_type', 'sys_order_type_id',
-            'weight', 'service_fee',
-        ]].merge(
-            api_data_final,
-            on=['receiver_province', 'receiver_district', 'carrier', 'order_type'],
-            how='left'
-        )
-    )
-    assert len(full_information_df) == len(tien_giao_dich), 'Transform data không chính xác'
-
-    print('2. Tính toán notification')
-    # Transform này chỉ lấy được 1 dòng service_fee nhỏ nhất
-    re_nhat_df = full_information_df.groupby(['order_id'])['service_fee'].min().reset_index()
-    re_nhat_df['notification'] = 'Rẻ nhất'
-    # Gắn ngược lại để lấy đủ row (trong trường hợp có nhiều carrier cùng mức giá
-    re_nhat_df = re_nhat_df.merge(full_information_df, on=['order_id', 'service_fee'], how='inner')
-
-    full_information_df1 = merge_left_only(full_information_df, re_nhat_df, keys=['order_id', 'service_fee'])
-
-    nhanh_nhat_df = full_information_df1.groupby(['order_id'])['estimate_delivery_time_details'].min().reset_index()
-    nhanh_nhat_df['notification'] = 'Nhanh nhất'
-    nhanh_nhat_df = nhanh_nhat_df.merge(full_information_df1, on=['order_id', 'estimate_delivery_time_details'],
-                                        how='inner')
-
-    full_information_df2 = merge_left_only(full_information_df1, nhanh_nhat_df,
-                                           keys=['order_id', 'estimate_delivery_time_details'])
-
-    hieu_qua_nhat_df = full_information_df2.groupby(['order_id'])['score'].max().reset_index()
-    hieu_qua_nhat_df['notification'] = 'Dịch vụ tốt'
-    hieu_qua_nhat_df = hieu_qua_nhat_df.merge(full_information_df2, on=['order_id', 'score'], how='inner')
-
-    full_information_df3 = merge_left_only(full_information_df2, hieu_qua_nhat_df, keys=['order_id', 'score'])
-    full_information_df3['notification'] = 'Bình thường'
-
-    full_information_df = pd.concat([
-        re_nhat_df,
-        nhanh_nhat_df,
-        hieu_qua_nhat_df,
-        full_information_df3
-    ], ignore_index=True)
-
-    full_information_df = full_information_df[[
-        'order_id',
-        'receiver_province_id', 'receiver_province', 'receiver_district_id', 'receiver_district',
-        'carrier_id', 'carrier', 'order_type', 'order_type_id', 'sys_order_type_id',
-        'weight', 'service_fee', 'carrier_status',
-        'estimate_delivery_time_details', 'estimate_delivery_time', 'delivery_success_rate',
-        'score', 'stars', 'notification',
-    ]]
-
-    assert full_information_df.isna().sum().all() == 0, 'Transform data không chính xác'
-
-    print('3. Lưu thông tin')
-    full_information_df.to_parquet('./output/data_full.parquet', index=False)
-    print('>>> Done\n')
-
-
 if __name__ == '__main__':
     out_data_api()
-    combine_full_data()

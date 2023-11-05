@@ -34,15 +34,15 @@ def total_transform():
     kho_giao_nhan = transform_data_kho_giao_nhan()
     print('>>> Done\n')
 
-    print('7. Transform data tiền giao dịch...')
-    tien_giao_dich = transform_data_tien_giao_dich()
-    print('>>> Done\n')
+    # print('7. Transform data tiền giao dịch...')
+    # tien_giao_dich = transform_data_tien_giao_dich()
+    # print('>>> Done\n')
 
     return (
         ngung_giao_nhan, danh_gia_zns,
         ti_le_giao_hang, chat_luong_noi_bo,
         thoi_gian_giao_hang, kho_giao_nhan,
-        tien_giao_dich
+        # tien_giao_dich
     )
 
 
