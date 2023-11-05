@@ -39,7 +39,7 @@ def customer_best_carrier(data_api_df, threshold=15):
             .rename(columns={'carrier': 'customer_best_carrier'})
     )
     group3 = df3[['receiver_province', 'receiver_district', 'order_type']].drop_duplicates()
-    group3['customer_best_carrier'] = 'Không xác định'
+    group3['customer_best_carrier'] = CUSTOMER_BEST_CARRIER_DEFAULT
 
     customer_best_carrier_df = pd.concat([group1, group2, group3]).drop_duplicates(
         ['receiver_province', 'receiver_district', 'order_type'], keep='first')
@@ -196,7 +196,7 @@ def out_data_api():
         api_data_final.merge(
             customer_best_carrier_df, on=['receiver_province', 'receiver_district', 'order_type'], how='left')
     )
-    api_data_final['customer_best_carrier'] = api_data_final['customer_best_carrier'].fillna('Không xác định')
+    api_data_final['customer_best_carrier'] = api_data_final['customer_best_carrier'].fillna(CUSTOMER_BEST_CARRIER_DEFAULT)
 
     api_data_final['order_type_id'] = api_data_final['order_type'].map(MAPPING_ORDER_TYPE_ID)
     api_data_final = api_data_final[[

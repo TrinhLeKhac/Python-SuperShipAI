@@ -254,6 +254,8 @@ MAPPING_CARRIER_ID = {
 }
 
 MAPPING_ID_CARRIER = {}
-for nvc, id in MAPPING_CARRIER_ID.items():
-    MAPPING_ID_CARRIER[id] = nvc
+for carrier, id in MAPPING_CARRIER_ID.items():
+    MAPPING_ID_CARRIER[id] = carrier
 
+CUSTOMER_BEST_CARRIER_DEFAULT = 'BEST Express'
+PARTNER_BEST_CARRIER_DEFAULT = 'BEST Express'
