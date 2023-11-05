@@ -27,7 +27,7 @@ def xu_ly_bang_gia_cuoc():
     best_df = pd.concat([bang_gia_cuoc_df.iloc[1:21, :2], bang_gia_cuoc_df.iloc[1:21, 9:16]], axis=1).reset_index(
         drop=True)
     best_df.columns = COLUMNS_CUOC_PHI
-    for i in range(180):
+    for i in range(80):
         best_df.loc[20 + i, :] = [10000 + 500 * i, 10500 + 500 * i, 38 + 2 * i, 38 + 2 * i, 38 + 2 * i, 38 + 2 * i,
                                   38 + 2 * i, 38 + 2 * i, 38 + 2 * i]
     best_df['carrier'] = 'BEST Express'
