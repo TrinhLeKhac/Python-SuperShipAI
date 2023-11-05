@@ -213,10 +213,18 @@ TRONG_SO = {
 MAPPING_TIEU_CHI_ID = {
     'Ngưng giao nhận': 1, 
     'Đánh giá ZNS': 2, 
-    'Tỉ lệ hoàn hàng': 3, 
+    'Tỉ lệ hoàn hàng': 3,
     'Chất lượng nội bộ': 4,
     'Thời gian giao hàng': 5,
     'Có kho giao nhận': 6,  
+}
+
+OVERLOADING_SCORE_DICT = {
+    'Ngưng giao nhận': [-10],
+    'Đánh giá ZNS': [-8, -10],
+    'Tỉ lệ hoàn hàng': [-10],
+    'Thời gian giao hàng': [-10],
+    'Có kho giao nhận': [-10]
 }
 
 ACTIVE_CARRIER = ['GHTK', 'GHN', 'Viettel Post', 'BEST Express', 'Ninja Van', 'SPX Express']

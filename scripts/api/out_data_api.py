@@ -31,25 +31,37 @@ def out_data_api():
     ) = total_transform()
 
     print('2. Tính toán quận huyện quá tải')
-    qua_tai1 = ngung_giao_nhan.loc[ngung_giao_nhan['score'] == -10][
-        ['receiver_province', 'receiver_district', 'carrier']]
-    qua_tai1['carrier_status'] = 'Quá tải (Ngưng giao nhận)'
+    qua_tai1 = ngung_giao_nhan.loc[ngung_giao_nhan['score'].isin(OVERLOADING_SCORE_DICT['Ngưng giao nhận'])]
+    qua_tai1 = qua_tai1[['receiver_province', 'receiver_district', 'carrier', 'status']].rename(
+        columns={'status': 'carrier_status'})
 
-    qua_tai2 = danh_gia_zns.loc[danh_gia_zns['score'] == -10][['receiver_province', 'receiver_district', 'carrier']]
-    qua_tai2['carrier_status'] = 'Quá tải (Đánh giá ZNS)'
+    qua_tai2 = danh_gia_zns.loc[
+        danh_gia_zns['score'].isin(OVERLOADING_SCORE_DICT['Đánh giá ZNS'])]
+    qua_tai2 = qua_tai2[['receiver_province', 'receiver_district', 'carrier', 'status']].rename(
+        columns={'status': 'carrier_status'})
+    qua_tai2.loc[
+        qua_tai2['carrier_status'] == 'Loại', 'carrier_status'] = 'Tổng số đánh giá ZNS 1, 2 sao >= 30% tổng đơn'
 
-    qua_tai3 = ti_le_giao_hang.loc[ti_le_giao_hang['score'] == -10][['receiver_province', 'receiver_district', 'carrier']]
-    qua_tai3['carrier_status'] = 'Quá tải (Tỉ lệ giao hàng)'
+    qua_tai3 = ti_le_giao_hang.loc[
+        ti_le_giao_hang['score'].isin(OVERLOADING_SCORE_DICT['Tỉ lệ hoàn hàng'])]
+    qua_tai3 = qua_tai3[['receiver_province', 'receiver_district', 'carrier', 'status']].rename(
+        columns={'status': 'carrier_status'})
 
-    qua_tai4 = thoi_gian_giao_hang.loc[thoi_gian_giao_hang['score'] == -10][
-        ['receiver_province', 'receiver_district', 'carrier']]
-    qua_tai4['carrier_status'] = 'Quá tải (Thời gian giao hàng)'
+    qua_tai4 = thoi_gian_giao_hang.loc[thoi_gian_giao_hang['score'].isin(OVERLOADING_SCORE_DICT['Thời gian giao hàng'])]
+    qua_tai4['carrier_status'] = qua_tai4['status'] + ' (' + qua_tai4['order_type'] + ')'
+    qua_tai4 = qua_tai4[['receiver_province', 'receiver_district', 'carrier', 'carrier_status']]
 
-    qua_tai5 = kho_giao_nhan.loc[kho_giao_nhan['score'] == -10][['receiver_province', 'receiver_district', 'carrier']]
-    qua_tai5['carrier_status'] = 'Quá tải (Kho giao nhận)'
+    qua_tai5 = kho_giao_nhan.loc[kho_giao_nhan['score'].isin(OVERLOADING_SCORE_DICT['Có kho giao nhận'])]
+    qua_tai5 = qua_tai5[['receiver_province', 'receiver_district', 'carrier', 'status']].rename(
+        columns={'status': 'carrier_status'})
+    qua_tai = pd.concat([qua_tai1, qua_tai2, qua_tai3, qua_tai4, qua_tai5])
 
-    qua_tai = pd.concat([qua_tai1, qua_tai2, qua_tai3, qua_tai4, qua_tai5]).drop_duplicates(
-        ['receiver_province', 'receiver_district', 'carrier'])
+    qua_tai = (
+        qua_tai
+        .groupby(['receiver_province', 'receiver_district', 'carrier'])
+        ['carrier_status'].apply(lambda x: ' + '.join(x))
+        .reset_index()
+    )
 
     print('3. Xử lý data thời gian giao dịch')
     thoi_gian_giao_hang = thoi_gian_giao_hang.rename(columns={'delivery_time_mean_h': 'estimate_delivery_time_details'})

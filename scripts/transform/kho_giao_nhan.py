@@ -40,7 +40,7 @@ def transform_buu_cuc(buu_cuc_df, carrier='BEST Express'):
         lambda s: status_kho_giao_nhan(s['n_post_offices'], s['n_post_offices_in_province'], s['n_district']),
         axis=1)
     buu_cuc_df['score'] = buu_cuc_df['status'].map(TRONG_SO['Có kho giao nhận']['Phân loại'])
-    buu_cuc_df['carrier'] = nvc
+    buu_cuc_df['carrier'] = carrier
     buu_cuc_df['criteria'] = 'Có kho giao nhận'
     buu_cuc_df['criteria_weight'] = TRONG_SO['Có kho giao nhận']['Tiêu chí']
 

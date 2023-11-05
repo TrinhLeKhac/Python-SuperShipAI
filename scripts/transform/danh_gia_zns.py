@@ -31,7 +31,7 @@ def transform_data_danh_gia_zns():
     )
     zns_total = (
         danh_gia_zns
-            .groupby(['receiver_province', 'receiver_district', 'carrier'])
+        .groupby(['receiver_province', 'receiver_district', 'carrier'])
         ['n_stars']
         .count()
         .reset_index()
