@@ -2,13 +2,13 @@ from scripts.utilities.helper import *
 from scripts.utilities.config import *
 
 
-def idx_tieu_chi_3(nvc_df):
+def idx_tieu_chi_3(nvc_df, delivery_success_rate_col='modified_delivery_success_rate'):
     list_idx = nvc_df.index.tolist()[:10]  # top 10 after ordering
-    th1 = nvc_df.loc[list_idx[-1], 'delivery_success_rate']
+    th1 = nvc_df.loc[list_idx[-1], delivery_success_rate_col]
     th2 = nvc_df.loc[list_idx[-1], 'total_order']
 
     extra_idx = nvc_df.loc[
-        (nvc_df['delivery_success_rate'] == th1)
+        (nvc_df[delivery_success_rate_col] == th1)
         & (nvc_df['total_order'] == th2)
         ].index.tolist()
 
@@ -75,34 +75,35 @@ def transform_data_ti_le_giao_hang():
     ti_le_giao_hang = hoan_hang.merge(tong_don, on=['receiver_province', 'receiver_district', 'carrier'], how='right')
     ti_le_giao_hang['total_failed_order'] = ti_le_giao_hang['total_failed_order'].fillna(0).astype(int)
     ti_le_giao_hang['delivery_success_rate'] = 1 - ti_le_giao_hang['total_failed_order'] / ti_le_giao_hang['total_order']
+    ti_le_giao_hang['modified_delivery_success_rate'] = ti_le_giao_hang['delivery_success_rate']
 
     # 3.1 Tiêu chí loại 1
     condition1 = (
         (
                 (ti_le_giao_hang['total_order'] >= 10) &
-                (1 - ti_le_giao_hang['delivery_success_rate'] >= 0.25)
+                (1 - ti_le_giao_hang['modified_delivery_success_rate'] >= 0.25)
         )
     )
     # 3.2 Tiêu chí loại 2
     condition2 = (
         (
                 (ti_le_giao_hang['total_order'] >= 4) &
-                (1 - ti_le_giao_hang['delivery_success_rate'] >= 0.5)
+                (1 - ti_le_giao_hang['modified_delivery_success_rate'] >= 0.5)
         )
     )
-    ti_le_giao_hang.loc[condition1, 'delivery_success_rate'] = -1  # loại theo tiêu chí 1
-    ti_le_giao_hang.loc[condition2, 'delivery_success_rate'] = -2  # loại theo tiêu chí 2
+    ti_le_giao_hang.loc[condition1, 'modified_delivery_success_rate'] = -1  # loại theo tiêu chí 1
+    ti_le_giao_hang.loc[condition2, 'modified_delivery_success_rate'] = -2  # loại theo tiêu chí 2
 
     # 3.3 Tiêu chí loại 3
     # # Loại top 10 khu vực có số đơn hàng >= 3 đơn + tỷ lệ hoàn > 20% (đã loại trừ tiêu chí 1, 2) theo từng nhà vận chuyển
     # # top 10 chọn theo tiêu chí tổng đơn (nhiều) + tỉ lệ giao hàng thành công (ít)
     filter_df = (
         ti_le_giao_hang.loc[
-            ~ti_le_giao_hang['delivery_success_rate'].isin([-1, -2])
-            & ((1 - ti_le_giao_hang['delivery_success_rate']) > 0.2)
+            ~ti_le_giao_hang['modified_delivery_success_rate'].isin([-1, -2])
+            & ((1 - ti_le_giao_hang['modified_delivery_success_rate']) > 0.2)
             & (ti_le_giao_hang['total_order'] >= 3)
-        ].sort_values(['carrier', 'total_order', 'delivery_success_rate'], ascending=[True, False, True])
-        [['carrier', 'total_order', 'delivery_success_rate']]
+        ].sort_values(['carrier', 'total_order', 'modified_delivery_success_rate'], ascending=[True, False, True])
+        [['carrier', 'total_order', 'modified_delivery_success_rate']]
     )
 
     total_remove_idx = []
@@ -111,11 +112,11 @@ def transform_data_ti_le_giao_hang():
         tmp_remove_idx = idx_tieu_chi_3(carrier_df)
         total_remove_idx.extend(tmp_remove_idx)
 
-    ti_le_giao_hang.loc[total_remove_idx, 'delivery_success_rate'] = -3
+    ti_le_giao_hang.loc[total_remove_idx, 'modified_delivery_success_rate'] = -3
 
     # 4. Tính status + score
     ti_le_giao_hang['status'] = (
-        ti_le_giao_hang.apply(lambda x: score_ti_le_giao_hang(x['total_order'], x['delivery_success_rate']), axis=1)
+        ti_le_giao_hang.apply(lambda x: score_ti_le_giao_hang(x['total_order'], x['modified_delivery_success_rate']), axis=1)
     )
     ti_le_giao_hang = (
         PROVINCE_MAPPING_DISTRICT_CROSS_CARRIER_DF.merge(
@@ -126,6 +127,7 @@ def transform_data_ti_le_giao_hang():
     ti_le_giao_hang['total_failed_order'] = ti_le_giao_hang['total_failed_order'].fillna(0).astype(int)
     ti_le_giao_hang['total_order'] = ti_le_giao_hang['total_order'].fillna(0).astype(int)
     ti_le_giao_hang['delivery_success_rate'] = ti_le_giao_hang['delivery_success_rate'].fillna(0)
+    ti_le_giao_hang['modified_delivery_success_rate'] = ti_le_giao_hang['modified_delivery_success_rate'].fillna(0)
     ti_le_giao_hang['status'] = ti_le_giao_hang['status'].fillna('Không có thông tin')
     ti_le_giao_hang['score'] = ti_le_giao_hang['status'].map(TRONG_SO['Tỉ lệ giao hàng']['Phân loại'])
     ti_le_giao_hang['criteria'] = 'Tỉ lệ giao hàng'
