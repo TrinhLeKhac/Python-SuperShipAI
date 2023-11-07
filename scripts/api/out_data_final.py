@@ -11,12 +11,17 @@ API_FULL_COLS = [
     'carrier_status', 'carrier_status_comment',
     'estimate_delivery_time_details', 'estimate_delivery_time', 'delivery_success_rate',
     'customer_best_carrier_id', 'customer_best_carrier',
-    'partner_best_carrier_id', 'partner_best_carrier', 'score', 'stars', 'notification',
+    'partner_best_carrier_id', 'partner_best_carrier', 'score', 'stars',
+    'cheapest_carrier_id', 'fastest_carrier_id', 'highest_score_carrier_id',
+    # 'notification',
 ]
+
 API_COLS = [
     'order_id', 'carrier_id', 'order_type_id', 'sys_order_type_id', 'service_fee',
     'carrier_status', 'estimate_delivery_time_details', 'estimate_delivery_time', 'delivery_success_rate',
-    'customer_best_carrier_id', 'partner_best_carrier_id', 'score', 'stars', 'notification',
+    'customer_best_carrier_id', 'partner_best_carrier_id', 'score', 'stars',
+    'cheapest_carrier_id', 'fastest_carrier_id', 'highest_score_carrier_id',
+    # 'notification',
 ]
 
 
@@ -245,6 +250,20 @@ def calculate_notification(input_df):
     return result_df
 
 
+def calculate_notification_v2(input_df):
+    result_df = input_df.copy()
+    result_df = result_df.sort_values(['order_id', 'service_fee'], ascending=[True, True])
+    result_df['cheapest_carrier_id'] = result_df.groupby('order_id').cumcount(ascending=True) + 1
+
+    result_df = result_df.sort_values(['order_id', 'estimate_delivery_time_details'], ascending=[True, True])
+    result_df['fastest_carrier_id'] = result_df.groupby('order_id').cumcount(ascending=True) + 1
+
+    result_df = result_df.sort_values(['order_id', 'score'], ascending=[True, False])
+    result_df['highest_score_carrier_id'] = result_df.groupby('order_id').cumcount(ascending=True) + 1
+
+    return result_df
+
+
 def partner_best_carrier(data_api_df, threshold=15):
     df1 = data_api_df.loc[data_api_df['total_order'] > threshold]
     df2 = data_api_df.loc[(data_api_df['total_order'] >= 1) & (data_api_df['total_order'] <= threshold)]
@@ -267,7 +286,8 @@ def partner_best_carrier(data_api_df, threshold=15):
 
     partner_best_carrier_df = pd.concat([group1, group2, group3]).drop_duplicates(
         ['receiver_province', 'receiver_district', 'order_type'], keep='first')
-    partner_best_carrier_df['partner_best_carrier_id'] = partner_best_carrier_df['partner_best_carrier'].map(MAPPING_CARRIER_ID)
+    partner_best_carrier_df['partner_best_carrier_id'] = partner_best_carrier_df['partner_best_carrier'].map(
+        MAPPING_CARRIER_ID)
 
     return partner_best_carrier_df
 
@@ -315,7 +335,7 @@ def out_data_final(input_df=None, n_rows=10_000):
     tmp_df3 = calculate_service_fee(tmp_df2)
     # assert len(tmp_df3) == len(tmp_df2), 'Transform data sai'
 
-    tmp_df4 = calculate_notification(tmp_df3)
+    tmp_df4 = calculate_notification_v2(tmp_df3)
     assert len(tmp_df4) == len(tmp_df3), 'Transform data sai'
 
     partner_best_carrier_df = partner_best_carrier(tmp_df4)
