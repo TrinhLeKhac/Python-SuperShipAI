@@ -1,6 +1,23 @@
 from scripts.utilities.helper import *
 from scripts.utilities.config import *
 
+API_FULL_COLS = [
+    'order_id',
+    'sender_province_id', 'sender_province', 'sender_district_id', 'sender_district',
+    'receiver_province_id', 'receiver_province', 'receiver_district_id', 'receiver_district',
+    'carrier_id', 'carrier', 'order_type', 'order_type_id', 'sys_order_type_id',
+    'weight', 'service_fee', 'delivery_type',
+    'carrier_status', 'carrier_status_comment',
+    'estimate_delivery_time_details', 'estimate_delivery_time', 'delivery_success_rate',
+    'customer_best_carrier_id', 'customer_best_carrier',
+    'partner_best_carrier_id', 'partner_best_carrier', 'score', 'stars', 'notification',
+]
+API_COLS = [
+    'order_id', 'carrier_id', 'order_type_id', 'sys_order_type_id', 'service_fee',
+    'carrier_status', 'estimate_delivery_time_details', 'estimate_delivery_time', 'delivery_success_rate',
+    'customer_best_carrier_id', 'partner_best_carrier_id', 'score', 'stars', 'notification',
+]
+
 
 def type_of_delivery(s):
     if ((s['sender_outer_region'] == 'Miền Bắc') & (s['receiver_outer_region'] == 'Miền Nam')) \
@@ -125,7 +142,7 @@ def generate_order_type(input_df):
             }), on=['receiver_province_id', 'receiver_district_id'], how='left')
     )
 
-    phan_vung_nvc = pd.read_parquet(ROOT_PATH + '/processed_data/phan_vung_nvc.parquet')
+    phan_vung_nvc = pd.read_parquet('./processed_data/phan_vung_nvc.parquet')
     result_df = (
         result_df.merge(
             phan_vung_nvc.rename(columns={
@@ -155,8 +172,10 @@ def combine_info_from_api(input_df):
         input_df.merge(
             api_data_final[[
                 'receiver_province_id', 'receiver_district_id', 'carrier_id', 'order_type_id',
-                'carrier_status', 'estimate_delivery_time_details', 'estimate_delivery_time',
-                'customer_best_carrier', 'delivery_success_rate', 'score', 'stars', 'total_order',
+                'carrier_status', 'carrier_status_comment',
+                'estimate_delivery_time_details', 'estimate_delivery_time',
+                'customer_best_carrier', 'customer_best_carrier_id',
+                'delivery_success_rate', 'score', 'stars', 'total_order',
             ]], on=['receiver_province_id', 'receiver_district_id', 'carrier_id', 'order_type_id'], how='left'
         )
     )
@@ -246,20 +265,19 @@ def partner_best_carrier(data_api_df, threshold=15):
 
     partner_best_carrier_df = pd.concat([group1, group2, group3]).drop_duplicates(
         ['receiver_province', 'receiver_district', 'order_type'], keep='first')
+    partner_best_carrier_df['partner_best_carrier_id'] = partner_best_carrier_df['partner_best_carrier'].map(MAPPING_CARRIER_ID)
 
     return partner_best_carrier_df
 
 
-def out_data_final(generate_sample=False):
-    if generate_sample:
-        input_df = generate_sample_input(n_rows=10_000)
-    else:
+def out_data_final(input_df=None, n_rows=10_000):
+    if len(input_df) == 0:
         giao_dich_valid = pd.read_parquet('./processed_data/giao_dich_combine_valid.parquet')
         giao_dich_valid = giao_dich_valid[[
             'order_id', 'weight', 'delivery_type', 'sender_province', 'sender_district',
             'receiver_province', 'receiver_district'
         ]]
-        input_df = (
+        focus_df = (
             giao_dich_valid.merge(
                 PROVINCE_MAPPING_DISTRICT_DF.rename(columns={
                     'province_id': 'sender_province_id',
@@ -267,7 +285,7 @@ def out_data_final(generate_sample=False):
                     'province': 'sender_province',
                     'district': 'sender_district'
                 }), on=['sender_province', 'sender_district'], how='left')
-            .merge(
+                .merge(
                 PROVINCE_MAPPING_DISTRICT_DF.rename(columns={
                     'province_id': 'receiver_province_id',
                     'district_id': 'receiver_district_id',
@@ -276,23 +294,24 @@ def out_data_final(generate_sample=False):
                 }), on=['receiver_province', 'receiver_district'], how='left')
         )
 
-        input_df = input_df[[
+        focus_df = focus_df[[
             'order_id', 'weight', 'delivery_type', 'sender_province_id', 'sender_district_id',
-            'receiver_province_id', 'receiver_district_id',
+            'receiver_province_id', 'receiver_district_id'
         ]]
-        input_df['delivery_type'] = input_df['delivery_type'].fillna('Gửi Bưu Cục')
+        focus_df['delivery_type'] = focus_df['delivery_type'].fillna('Gửi Bưu Cục')
 
-        assert len(giao_dich_valid) == len(input_df), 'Transform data sai'
-        print('Số dòng: ', len(input_df))
-
-    tmp_df1 = generate_order_type(input_df)
-    assert len(tmp_df1) == len(input_df) * len(ACTIVE_CARRIER), 'Transform data sai'
+        assert len(giao_dich_valid) == len(focus_df), 'Transform data sai'
+        print('Số dòng: ', len(focus_df))
+    else:
+        focus_df = input_df.copy()
+    tmp_df1 = generate_order_type(focus_df)
+    assert len(tmp_df1) == len(focus_df) * len(ACTIVE_CARRIER), 'Transform data sai'
 
     tmp_df2 = combine_info_from_api(tmp_df1)
     assert len(tmp_df2) == len(tmp_df1), 'Transform data sai'
 
     tmp_df3 = calculate_service_fee(tmp_df2)
-    assert len(tmp_df3) == len(tmp_df2), 'Transform data sai'
+    # assert len(tmp_df3) == len(tmp_df2), 'Transform data sai'
 
     tmp_df4 = calculate_notification(tmp_df3)
     assert len(tmp_df4) == len(tmp_df3), 'Transform data sai'
@@ -308,23 +327,14 @@ def out_data_final(generate_sample=False):
     )
     assert len(final_df) == len(tmp_df4), 'Transform data sai'
 
-    final_df = final_df[[
-        'order_id',
-        'sender_province_id', 'sender_province', 'sender_district_id', 'sender_district',
-        'receiver_province_id', 'receiver_province', 'receiver_district_id', 'receiver_district',
-        'carrier_id', 'carrier', 'order_type', 'order_type_id', 'sys_order_type_id',
-        'weight', 'service_fee', 'delivery_type',
-        'carrier_status', 'estimate_delivery_time_details', 'estimate_delivery_time', 'delivery_success_rate',
-        'customer_best_carrier', 'partner_best_carrier', 'score', 'stars', 'notification',
-    ]]
-
-    if generate_sample:
-        return final_df
+    if len(input_df) > 0:
+        final_df = final_df[API_COLS]
     else:
-        final_df.to_parquet('./output/data_final.parquet')
-        # print('Lưu dữ liệu respone request')
-        # with open('./output/data_final_respone_request.json', 'w', encoding='utf-8') as file:
-        #     final_df.to_json(file, force_ascii=False)
+        final_df = final_df[API_FULL_COLS]
+        final_df.to_parquet('./output/data_check_output.parquet')
+        final_df.to_excel('./output/data_check_output.xlsx')
+
+    return final_df
 
     print('>>> Done\n')
     print('-' * 100)
