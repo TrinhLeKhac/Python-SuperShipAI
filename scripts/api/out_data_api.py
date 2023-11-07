@@ -47,7 +47,7 @@ def customer_best_carrier(data_api_df, threshold=15):
     return customer_best_carrier_df
 
 
-def out_data_api():
+def out_data_api(return_full_cols_df=False):
     print('1. Lấy toàn bộ data')
     (
         ngung_giao_nhan, danh_gia_zns,
@@ -203,21 +203,31 @@ def out_data_api():
 
     api_data_final['order_type_id'] = api_data_final['order_type'].map(MAPPING_ORDER_TYPE_ID)
     api_data_final['customer_best_carrier_id'] = api_data_final['customer_best_carrier'].map(MAPPING_CARRIER_ID)
-    api_data_final = api_data_final[[
-        'receiver_province_id', 'receiver_province', 'receiver_district_id', 'receiver_district',
-        'carrier_id', 'carrier', 'order_type', 'order_type_id', 'carrier_status', 'carrier_status_comment',
-        'estimate_delivery_time_details', 'estimate_delivery_time',
-        'customer_best_carrier', 'customer_best_carrier_id',
-        'total_order', 'delivery_success_rate', 'score', 'stars',
-    ]]
-    print('9. Lưu dữ liệu API')
-    with open('./output/data_api.json', 'w', encoding='utf-8') as file:
-        api_data_final.to_json(file, force_ascii=False)
 
-    api_data_final.to_parquet('./output/data_api.parquet', index=False)
-    print('>>> Done\n')
+    if return_full_cols_df:
+        api_data_final = api_data_final[[
+            'receiver_province_id', 'receiver_province', 'receiver_district_id', 'receiver_district',
+            'carrier_id', 'carrier', 'order_type', 'order_type_id', 'carrier_status', 'carrier_status_comment',
+            'estimate_delivery_time_details', 'estimate_delivery_time',
+            'customer_best_carrier', 'customer_best_carrier_id',
+            'total_order', 'delivery_success_rate', 'score', 'stars',
+        ]]
+        return api_data_final
+    else:
+        api_data_final = api_data_final[[
+            'receiver_province_id', 'receiver_district_id',
+            'carrier_id', 'order_type_id', 'carrier_status', 'carrier_status_comment',
+            'estimate_delivery_time_details', 'estimate_delivery_time',
+            'customer_best_carrier_id', 'total_order', 'delivery_success_rate', 'score', 'stars',
+        ]]
+        print('9. Lưu dữ liệu API')
+        with open('./output/data_api.json', 'w', encoding='utf-8') as file:
+            api_data_final.to_json(file, force_ascii=False)
 
-    print('-' * 100)
+        api_data_final.to_parquet('./output/data_api.parquet', index=False)
+        print('>>> Done\n')
+
+        print('-' * 100)
 
 
 if __name__ == '__main__':
