@@ -294,7 +294,7 @@ def partner_best_carrier(data_api_df, threshold=15):
 
 def out_data_final(input_df=None):
     if input_df is None:
-        giao_dich_valid = pd.read_parquet(ROOT_PATH + '/processed_data/giao_dich_combine_valid.parquet')
+        giao_dich_valid = pd.read_parquet('./processed_data/giao_dich_combine_valid.parquet')
         giao_dich_valid = giao_dich_valid[[
             'order_id', 'weight', 'delivery_type', 'sender_province', 'sender_district',
             'receiver_province', 'receiver_district'
