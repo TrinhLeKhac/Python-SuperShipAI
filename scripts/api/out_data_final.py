@@ -292,9 +292,9 @@ def partner_best_carrier(data_api_df, threshold=15):
     return partner_best_carrier_df
 
 
-def out_data_final(input_df=None, n_rows=10_000):
-    if len(input_df) == 0:
-        giao_dich_valid = pd.read_parquet('./processed_data/giao_dich_combine_valid.parquet')
+def out_data_final(input_df=None):
+    if input_df is None:
+        giao_dich_valid = pd.read_parquet(ROOT_PATH + '/processed_data/giao_dich_combine_valid.parquet')
         giao_dich_valid = giao_dich_valid[[
             'order_id', 'weight', 'delivery_type', 'sender_province', 'sender_district',
             'receiver_province', 'receiver_district'
@@ -349,12 +349,12 @@ def out_data_final(input_df=None, n_rows=10_000):
     )
     assert len(final_df) == len(tmp_df4), 'Transform data sai'
 
-    if len(input_df) > 0:
-        final_df = final_df[API_COLS]
-    else:
+    if input_df is None:
         final_df = final_df[API_FULL_COLS]
         final_df.to_parquet('./output/data_check_output.parquet')
         final_df.to_excel('./output/data_check_output.xlsx')
+    else:
+        final_df = final_df[API_COLS]
 
     return final_df
 
