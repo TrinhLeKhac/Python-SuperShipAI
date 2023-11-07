@@ -59,33 +59,33 @@ def out_data_api():
     print('2. Tính toán quận huyện quá tải')
     qua_tai1 = ngung_giao_nhan.loc[ngung_giao_nhan['score'].isin(OVERLOADING_SCORE_DICT['Ngưng giao nhận'])]
     qua_tai1 = qua_tai1[['receiver_province', 'receiver_district', 'carrier', 'status']].rename(
-        columns={'status': 'carrier_status'})
+        columns={'status': 'carrier_status_comment'})
 
     qua_tai2 = danh_gia_zns.loc[
         danh_gia_zns['score'].isin(OVERLOADING_SCORE_DICT['Đánh giá ZNS'])]
     qua_tai2 = qua_tai2[['receiver_province', 'receiver_district', 'carrier', 'status']].rename(
-        columns={'status': 'carrier_status'})
+        columns={'status': 'carrier_status_comment'})
     qua_tai2.loc[
-        qua_tai2['carrier_status'] == 'Loại', 'carrier_status'] = 'Tổng số đánh giá ZNS 1, 2 sao >= 30% tổng đơn'
+        qua_tai2['carrier_status_comment'] == 'Loại', 'carrier_status_comment'] = 'Tổng số đánh giá ZNS 1, 2 sao >= 30% tổng đơn'
 
     qua_tai3 = ti_le_giao_hang.loc[
         ti_le_giao_hang['score'].isin(OVERLOADING_SCORE_DICT['Tỉ lệ hoàn hàng'])]
     qua_tai3 = qua_tai3[['receiver_province', 'receiver_district', 'carrier', 'status']].rename(
-        columns={'status': 'carrier_status'})
+        columns={'status': 'carrier_status_comment'})
 
     qua_tai4 = thoi_gian_giao_hang.loc[thoi_gian_giao_hang['score'].isin(OVERLOADING_SCORE_DICT['Thời gian giao hàng'])]
-    qua_tai4['carrier_status'] = qua_tai4['status'] + ' (' + qua_tai4['order_type'] + ')'
-    qua_tai4 = qua_tai4[['receiver_province', 'receiver_district', 'carrier', 'carrier_status']]
+    qua_tai4['carrier_status_comment'] = qua_tai4['status'] + ' (' + qua_tai4['order_type'] + ')'
+    qua_tai4 = qua_tai4[['receiver_province', 'receiver_district', 'carrier', 'carrier_status_comment']]
 
     qua_tai5 = kho_giao_nhan.loc[kho_giao_nhan['score'].isin(OVERLOADING_SCORE_DICT['Có kho giao nhận'])]
     qua_tai5 = qua_tai5[['receiver_province', 'receiver_district', 'carrier', 'status']].rename(
-        columns={'status': 'carrier_status'})
+        columns={'status': 'carrier_status_comment'})
     qua_tai = pd.concat([qua_tai1, qua_tai2, qua_tai3, qua_tai4, qua_tai5])
 
     qua_tai = (
         qua_tai.groupby([
             'receiver_province', 'receiver_district', 'carrier'
-        ])['carrier_status'].apply(lambda x: ' + '.join(x))
+        ])['carrier_status_comment'].apply(lambda x: ' + '.join(x))
             .reset_index()
     )
 
@@ -177,7 +177,10 @@ def out_data_api():
 
     print('7. Gắn thông tin quá tải')
     api_data_final = api_data_final.merge(qua_tai, on=['receiver_province', 'receiver_district', 'carrier'], how='left')
-    api_data_final['carrier_status'] = api_data_final['carrier_status'].fillna('Bình thường')
+    api_data_final['carrier_status_comment'] = api_data_final['carrier_status_comment'].fillna('Bình thường')
+    api_data_final['carrier_status'] = 0
+    api_data_final.loc[api_data_final['carrier_status_comment'] == 'Quá tải', 'carrier_status'] = 1
+    api_data_final.loc[~api_data_final['carrier_status_comment'].isin(['Bình thường', 'Quá tải']), 'carrier_status'] = 2
 
     api_data_final['carrier_id'] = api_data_final['carrier'].map(MAPPING_CARRIER_ID)
     api_data_final = (
