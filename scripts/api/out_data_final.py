@@ -252,14 +252,15 @@ def calculate_notification(input_df):
 
 def calculate_notification_v2(input_df):
     result_df = input_df.copy()
-    result_df = result_df.sort_values(['order_id', 'service_fee'], ascending=[True, True])
-    result_df['cheapest_carrier_id'] = result_df.groupby('order_id').cumcount(ascending=True) + 1
+    result_df["cheapest_carrier_id"] = result_df.groupby("order_id")["service_fee"].rank(method="dense", ascending=True)
+    result_df["cheapest_carrier_id"] = result_df["cheapest_carrier_id"].astype(int)
 
-    result_df = result_df.sort_values(['order_id', 'estimate_delivery_time_details'], ascending=[True, True])
-    result_df['fastest_carrier_id'] = result_df.groupby('order_id').cumcount(ascending=True) + 1
+    result_df["fastest_carrier_id"] = result_df.groupby("order_id")["estimate_delivery_time_details"].rank(
+        method="dense", ascending=True)
+    result_df["fastest_carrier_id"] = result_df["fastest_carrier_id"].astype(int)
 
-    result_df = result_df.sort_values(['order_id', 'score'], ascending=[True, False])
-    result_df['highest_score_carrier_id'] = result_df.groupby('order_id').cumcount(ascending=True) + 1
+    result_df["highest_score_carrier_id"] = result_df.groupby("order_id")["score"].rank(method="dense", ascending=False)
+    result_df["highest_score_carrier_id"] = result_df["highest_score_carrier_id"].astype(int)
 
     return result_df
 
