@@ -15,7 +15,6 @@ API_FULL_COLS = [
     'cheapest_carrier_id', 'fastest_carrier_id', 'highest_score_carrier_id',
     # 'notification',
 ]
-
 API_COLS = [
     'order_id', 'carrier_id', 'order_type_id', 'sys_order_type_id', 'service_fee',
     'carrier_status', 'estimate_delivery_time_details', 'estimate_delivery_time', 'delivery_success_rate',
@@ -173,7 +172,7 @@ def generate_order_type(input_df):
 
 
 def combine_info_from_api(input_df):
-    # api_data_final = pd.read_parquet('./output/data_api.parquet')
+    # api_data_final = pd.read_parquet(ROOT_PATH + '/output/data_api.parquet')
     api_data_final = out_data_api(return_full_cols_df=True)
     result_df = (
         input_df.merge(
@@ -340,7 +339,6 @@ def out_data_final(input_df=None):
     assert len(tmp_df4) == len(tmp_df3), 'Transform data sai'
 
     partner_best_carrier_df = partner_best_carrier(tmp_df4)
-
     final_df = (
         tmp_df4.merge(
             partner_best_carrier_df,
@@ -349,8 +347,8 @@ def out_data_final(input_df=None):
         )
     )
     assert len(final_df) == len(tmp_df4), 'Transform data sai'
-
     if input_df is None:
+        print('Saving data...')
         final_df = final_df[API_FULL_COLS]
         final_df.to_parquet('./output/data_check_output.parquet')
         final_df.to_excel('./output/data_check_output.xlsx')

@@ -4,12 +4,12 @@ import pandas as pd
 
 
 @st.cache_data
-def get_data_api():
-    return pd.read_json('./output/data_api.json')
+def st_get_data_api_final():
+    return pd.read_parquet('./output/data_check_output.parquet')
 
 
 @st.cache_data
-def get_tinh_thanh_quan_huyen_from_api():
+def st_get_province_mapping_district():
     return pd.read_parquet('./processed_data/province_mapping_district.parquet')
 
 
