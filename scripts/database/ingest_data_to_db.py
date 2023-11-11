@@ -12,7 +12,7 @@ def ingest_data_to_db():
     for f, schema in TABLE_SCHEMA.values():
         if f not in ['data_api', 'data_api_full', 'data_check_output']:
             tmp_df = pd.read_parquet(os.path.join(processed_data_path, f))
-            tmp_df.to_sql(name=file, con=engine, schema="db_schema", index=False, dtype=schema)
+            tmp_df.to_sql(name=f, con=engine, schema="db_schema", index=False, dtype=schema)
 
     print('2. Ingest output API')
     data_api_df = pd.read_parquet('./output/data_api.parquet')
@@ -23,8 +23,8 @@ def ingest_data_to_db():
     data_api_full_df.to_sql(name='data_api_full', con=engine, schema="db_schema", index=False, dtype=TABLE_SCHEMA['data_api_full'])
 
     print('4. Ingest data check output')
-    final_df = out_data_final()
-    data_api_full_df.to_sql(name='data_check_output', con=engine, schema="db_schema", index=False, dtype=TABLE_SCHEMA['data_check_output'])
+    check_df = out_data_final()
+    check_df.to_sql(name='data_check_output', con=engine, schema="db_schema", index=False, dtype=TABLE_SCHEMA['data_check_output'])
 
 
 if __name__ == '__main__':
