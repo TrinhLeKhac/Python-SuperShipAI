@@ -322,7 +322,7 @@ def out_data_final(input_df=None, carriers=ACTIVE_CARRIER):
     else:
         focus_df = input_df.copy()
     tmp_df1 = generate_order_type(focus_df, carriers=carriers)
-    # assert len(tmp_df1) == len(focus_df) * len(ACTIVE_CARRIER), 'Transform data sai'
+    assert len(tmp_df1) == len(focus_df) * len(carriers), 'Transform data sai'
 
     tmp_df2 = combine_info_from_api(tmp_df1)
     assert len(tmp_df2) == len(tmp_df1), 'Transform data sai'
