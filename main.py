@@ -99,24 +99,7 @@ with tab1:
         if out_data_api_button and st.session_state['api_button_state']:
             st.info('Đã có kết quả API')
 
-        out_data_to_check_button = st.button('Xuất data kiểm tra', type="primary")
-        if 'check_button_state' not in st.session_state:
-            st.session_state['check_button_state'] = False
-        if out_data_to_check_button and not st.session_state['check_button_state']:
-            try:
-                start = time()
-                with st.spinner('Đang xử lý...'):
-                    out_data_final(input_df=None)
-                stop = time()
-                st.session_state['check_button_state'] = True
-                st.success("Done")
-                st.info('Thời gian xử lý: ' + convert_time_m_s(stop, start))
-            except:
-                st.error("Có lỗi xảy ra")
-        if out_data_to_check_button and st.session_state['check_button_state']:
-            st.info('Đã có kết quả API')
-
-if os.path.exists('./output/data_check_output.parquet'):
+if os.path.exists('./output/data_api.parquet'):
     with tab3:
         toggle2 = st.toggle('Thông tin')
         if toggle2:
@@ -138,132 +121,111 @@ if os.path.exists('./output/data_check_output.parquet'):
             """
             )
         # Show output API
-        df_data_final = st_get_data_api_final()
+        pro_dis_df = st_get_province_mapping_district()
         with st.container():
             order_id = st.text_input('Nhập mã đơn hàng: ')
-            if order_id in df_data_final['ma_don_hang'].unique().tolist():
-                st.warning('Đơn hàng cũ')
-                df_st_output = df_data_final.loc[
-                    (df_data_final['order_id'] == order_id)
-                ]
-                df_st_output = df_st_output[
-                    ['order_id', 'carrier_id', 'carrier', 'status_carrier_comment', 'service_fee', 'estimate_delivery_time', 'score', 'stars']
-                ]
-                st.markdown("""
-                <style>
-                table {
-                tr:first-child
-                    {
-                    background-color: #3944BC;
-                    }
-                }
-                </style>
-                """, unsafe_allow_html=True)
-
-                st.dataframe(
-                    df_st_output,
-                    column_config={
-                        'order_id': 'Mã đơn hàng',
-                        "carrier_id": "ID Nhà vận chuyển",
-                        "carrier": "Nhà vận chuyển",
-                        "status_carrier_comment": "Trạng thái nhà vận chuyển",
-                        "service_fee": "Tiền cước",
-                        "estimate_delivery_time": "Thời gian giao dự kiến",
-                        "score": "Score đánh giá",
-                        "stars": st.column_config.NumberColumn(
-                            "Phân loại",
-                            format="%d ⭐",
-                        ),
-                    },
-                    hide_index=True,
+            sender_province, sender_district = st.columns(2)
+            receiver_province, receiver_district = st.columns(2)
+            with sender_province:
+                opt_sender_province = st.selectbox(
+                    "Chọn tỉnh thành giao hàng (ID)",
+                    options=(pro_dis_df['province'].unique().tolist()),
+                    key='province',
                 )
-            else:
-                sender_province, sender_district = st.columns(2)
-                receiver_province, receiver_district = st.columns(2)
-                province_district_norm_df = st_get_province_mapping_district()
-                with sender_province:
-                    opt_sender_province = st.selectbox(
-                        "Chọn tỉnh thành giao hàng (ID)",
-                        options=(province_district_norm_df['province_id'].unique().tolist()),
-                        key='province_id',
-                    )
-                with sender_district:
-                    opt_sender_district = st.selectbox(
-                        "Chọn quận huyện giao hàng (ID)",
-                        options=(
-                            province_district_norm_df.loc[
-                                province_district_norm_df['province_id'] == opt_sender_province]
-                            ['district_id'].unique()),
-                        key='district_id',
-                    )
-                with receiver_province:
-                    opt_receiver_province = st.selectbox(
-                        "Chọn tỉnh thành giao hàng (ID)",
-                        options=(province_district_norm_df['province_id'].unique().tolist()),
-                        key='province_id',
-                    )
-                with receiver_district:
-                    opt_receiver_district = st.selectbox(
-                        "Chọn quận huyện giao hàng (ID)",
-                        options=(
-                            province_district_norm_df.loc[
-                                province_district_norm_df['province_id'] == opt_receiver_province]
-                            ['district_id'].unique()),
-                        key='district_id',
-                    )
+                opt_sender_province_id = pro_dis_df.loc[pro_dis_df['province'] == opt_sender_province]['province_id']
+            with sender_district:
+                opt_sender_district = st.selectbox(
+                    "Chọn quận huyện giao hàng (ID)",
+                    options=(
+                        pro_dis_df.loc[
+                            pro_dis_df['province'] == opt_sender_province]
+                        ['district'].unique()),
+                    key='district',
+                )
+                opt_sender_district_id = pro_dis_df.loc[pro_dis_df['district'] == opt_sender_district]['district_id']
+            with receiver_province:
+                opt_receiver_province = st.selectbox(
+                    "Chọn tỉnh thành giao hàng (ID)",
+                    options=(pro_dis_df['province'].unique().tolist()),
+                    key='province',
+                )
+                opt_receiver_province_id = pro_dis_df.loc[pro_dis_df['province'] == opt_receiver_province]['province_id']
+            with receiver_district:
+                opt_receiver_district = st.selectbox(
+                    "Chọn quận huyện giao hàng (ID)",
+                    options=(
+                        pro_dis_df.loc[
+                            pro_dis_df['province_id'] == opt_receiver_province]
+                        ['district_id'].unique()),
+                    key='district_id',
+                )
+                opt_receiver_district_id = pro_dis_df.loc[pro_dis_df['district'] == opt_receiver_district]['district_id']
 
-                carrier_id, delivery_type = st.columns(2)
-                with carrier_id:
-                    option_carriers = st.multiselect(
-                        "Chọn nhà vận chuyển",
-                        options=( '1 (GHTK)', '2 (GHN)', '4 (VTP)', '6 (BEST)', '7 (NJV)', '10 (SPX)'),
-                        key='carrier_id'
-                    )
-                    option_carriers_id = [int(re.findall(r'\d+', opt)[0]) for opt in option_carriers]
-                with delivery_type:
-                    option_delivery_type = st.selectbox(
-                        "Chọn loại vận chuyển",
-                        options=('Nội Miền', 'Cận Miền', 'Nội Thành Tỉnh', 'Ngoại Thành Tỉnh'),
-                        key='delivery_type'
-                    )
-                weight = st.number_input('Nhập khối lượng đơn (<= 50,000g): ', key='weight')
+            carrier_id, delivery_type = st.columns(2)
+            with carrier_id:
+                option_carriers = st.multiselect(
+                    "Chọn nhà vận chuyển",
+                    options=('1 (GHTK)', '2 (GHN)', '4 (VTP)', '6 (BEST)', '7 (NJV)', '10 (SPX)'),
+                    key='carrier_id'
+                )
+                option_carriers_id = [int(re.findall(r'\d+', opt)[0]) for opt in option_carriers]
+            with delivery_type:
+                option_delivery_type = st.selectbox(
+                    "Chọn loại vận chuyển",
+                    options=('Nội Miền', 'Cận Miền', 'Cách Miền', 'Nội Thành Tỉnh', 'Ngoại Thành Tỉnh', 'Nội Thành Tp.HCM - HN', 'Ngoại Thành Tp.HCM - HN'),
+                    key='delivery_type'
+                )
+            weight = st.number_input('Nhập khối lượng đơn (<= 50,000g): ', key='weight')
 
-                if order_id != '' and (weight > 0):
-                    print(order_id)
-                    print(weight)
-                    print(opt_sender_province)
-                    print(opt_sender_district)
-                    print(opt_receiver_province)
-                    print(opt_receiver_district)
-                    print(option_carriers)
-                    print(option_delivery_type)
-                    df_input = pd.DataFrame(data={
-                        'order_id': order_id,
-                        'weight': weight,
-                        'delivery_type': option_delivery_type,
-                        'sender_province_id': opt_sender_province,
-                        'sender_district_id': opt_sender_district,
-                        'receiver_province_id': opt_receiver_province,
-                        'receiver_district_id': opt_receiver_district,
-                    })
-                    df_st_output = out_data_final(df_input)
-                    if len(df_st_output) > 0:
-                        st.dataframe(
-                            df_st_output,
-                            column_config={
-                                "order_id": "Mã đơn hàng",
-                                "carrier_id": "ID Nhà vận chuyển",
-                                "carrier": "Nhà vận chuyển",
-                                "status_carrier_comment": "Trạng thái nhà vận chuyển",
-                                "service_fee": "Tiền cước",
-                                "estimate_delivery_time": "Thời gian giao dự kiến",
-                                "score": "Score đánh giá",
-                                "stars": st.column_config.NumberColumn(
-                                    "Phân loại",
-                                    format="%d ⭐",
-                                ),
-                            },
-                            hide_index=True,
-                        )
-                    else:
-                        st.error('Tập dữ liệu quá khứ (dùng để tính toán) chưa có thông tin ', icon="🚨")
+            if order_id != '' and (weight > 0):
+                print(order_id)
+                print(weight)
+                print(opt_sender_province)
+                print(opt_sender_district)
+                print(opt_receiver_province)
+                print(opt_receiver_district)
+                print(option_carriers)
+                print(option_delivery_type)
+                df_input = pd.DataFrame(data={
+                    'order_id': order_id,
+                    'weight': weight,
+                    'delivery_type': option_delivery_type,
+                    'sender_province_id': opt_sender_province,
+                    'sender_district_id': opt_sender_district,
+                    'receiver_province_id': opt_receiver_province,
+                    'receiver_district_id': opt_receiver_district,
+                })
+
+                df_st_output = out_data_final(df_input)
+                df_st_output = df_st_output.loc[df_st_output['carrier'].isin(option_carriers)]
+                df_st_output = df_st_output[[
+                    'order_id', 'carrier', 'service_fee', 'status_carrier_comment',
+                    'estimate_delivery_time', 'delivery_success_rate', 'customer_best_carrier', 'partner_best_carrier',
+                    'cheapest_carrier', 'fastest_carrier', 'highest_score_carrier',
+                    'score', 'stars',
+                ]]
+                if len(df_st_output) > 0:
+                    st.dataframe(
+                        df_st_output,
+                        column_config={
+                            "order_id": "Mã đơn hàng",
+                            "carrier": "Nhà vận chuyển",
+                            "service_fee": "Tiền cước",
+                            "status_carrier_comment": "Trạng thái nhà vận chuyển",
+                            "estimate_delivery_time": "Thời gian giao dự kiến",
+                            "delivery_success_rate": 'Tỉ lệ giao thành công',
+                            "customer_best_carrier": "NVC tốt nhất cho Khách hàng",
+                            "partner_best_carrier": "NVC tốt nhất cho Đối tác",
+                            "cheapest_carrier": "NVC rẻ nhất",
+                            "fastest_carrier": "NVC nhanh nhất",
+                            "highest_score_carrier": "NVC hiệu quả nhất",
+                            "score": "Score đánh giá",
+                            "stars": st.column_config.NumberColumn(
+                                "Phân loại",
+                                format="%d ⭐",
+                            ),
+                        },
+                        hide_index=True,
+                    )
+                else:
+                    st.error('Tập dữ liệu quá khứ (dùng để tính toán) chưa có thông tin ', icon="🚨")

@@ -172,7 +172,7 @@ def generate_order_type(input_df):
 
 
 def combine_info_from_api(input_df):
-    # api_data_final = pd.read_parquet(ROOT_PATH + '/output/data_api.parquet')
+    # api_data_final = pd.read_parquet('./output/data_api.parquet')
     api_data_final = out_data_api(return_full_cols_df=True)
     result_df = (
         input_df.merge(
