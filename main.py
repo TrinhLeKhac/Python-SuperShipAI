@@ -165,10 +165,10 @@ if os.path.exists('./output/data_api.parquet'):
             with carrier_id:
                 opt_carriers = st.multiselect(
                     "Chọn nhà vận chuyển",
-                    options=('1 (GHTK)', '2 (GHN)', '4 (VTP)', '6 (BEST)', '7 (NJV)', '10 (SPX)'),
+                    options=('GHTK', 'GHN', 'Viettel Post', 'BEST Express', 'Ninja Van', 'SPX Express'),
                     key='carrier_id'
                 )
-                option_carriers_id = [int(re.findall(r'\d+', opt)[0]) for opt in opt_carriers]
+                # option_carriers_id = [int(re.findall(r'\d+', opt)[0]) for opt in opt_carriers]
             with delivery_type:
                 opt_delivery_type = st.selectbox(
                     "Chọn loại vận chuyển",
@@ -189,6 +189,14 @@ if os.path.exists('./output/data_api.parquet'):
                 })
 
                 df_st_output = out_data_final(df_input, carriers=opt_carriers)
+                df_st_output["fastest_carrier_id"] = df_st_output["estimate_delivery_time_details"].rank(
+                    method="dense", ascending=True)
+                df_st_output["fastest_carrier_id"] = df_st_output["fastest_carrier_id"].astype(int)
+
+                df_st_output["highest_score_carrier_id"] = df_st_output["score"].rank(
+                    method="dense", ascending=False)
+                df_st_output["highest_score_carrier_id"] = df_st_output["highest_score_carrier_id"].astype(int)
+
                 df_st_output = df_st_output[[
                     'order_id', 'carrier_id', 'order_type_id', 'sys_order_type_id',
                     'service_fee', 'carrier_status', 'carrier_status_comment',
@@ -204,15 +212,15 @@ if os.path.exists('./output/data_api.parquet'):
                             "order_id": "Mã đơn hàng",
                             "carrier_id": "ID của Nhà vận chuyển",
                             "order_type_id": "ID Loại vận chuyển",
-                            "system_order_type_id": "ID Loại vận chuyển (sys)",
+                            "sys_order_type_id": "ID Loại vận chuyển (Hệ thống)",
                             "service_fee": "Tiền cước",
-                            "status_carrier": "Trạng thái nhà vận chuyển",
-                            "status_carrier_comment": "Trạng thái nhà vận chuyển (comment)",
+                            "carrier_status": "Trạng thái nhà vận chuyển",
+                            "carrier_status_comment": "Trạng thái nhà vận chuyển (comment)",
                             "estimate_delivery_time_details": "Thời gian giao dự kiến (dạng thập phân)",
                             "estimate_delivery_time": "Thời gian giao dự kiến",
                             "delivery_success_rate": 'Tỉ lệ giao thành công',
-                            "customer_best_carrier": "NVC tốt nhất cho Khách hàng",
-                            "partner_best_carrier": "NVC tốt nhất cho Đối tác",
+                            "customer_best_carrier_id": "ID NVC tốt nhất cho Khách hàng",
+                            "partner_best_carrier_id": "ID NVC tốt nhất cho Đối tác",
                             "cheapest_carrier_id": "Ranking NVC (tiêu chí Rẻ nhất)",
                             "fastest_carrier_id": "Ranking NVC (tiêu chí Nhanh nhất)",
                             "highest_score_carrier_id": "Ranking NVC (Tiêu chí Hiệu quả nhất)",
