@@ -8,6 +8,7 @@ from functools import reduce
 from datetime import datetime
 from time import time
 import re
+import os
 
 
 def convert_time_m_s(stop, start):

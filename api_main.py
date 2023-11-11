@@ -1,11 +1,11 @@
 from fastapi import FastAPI
 from sqlalchemy.ext.asyncio import async_sessionmaker
-from database.crud import CRUD
-from database.db import engine
-from database.schemas import NoteModel, NoteCreateModel
+from scripts.database.crud import CRUD
+from scripts.database.db import engine
+from scripts.database import NoteModel, NoteCreateModel
 from http import HTTPStatus
 from typing import List
-from database.models import Note
+from scripts.database.models import Note
 import uuid
 
 app = FastAPI(
