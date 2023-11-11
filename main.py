@@ -163,14 +163,14 @@ if os.path.exists('./output/data_api.parquet'):
 
             carrier_id, delivery_type = st.columns(2)
             with carrier_id:
-                option_carriers = st.multiselect(
+                opt_carriers = st.multiselect(
                     "Chọn nhà vận chuyển",
                     options=('1 (GHTK)', '2 (GHN)', '4 (VTP)', '6 (BEST)', '7 (NJV)', '10 (SPX)'),
                     key='carrier_id'
                 )
-                option_carriers_id = [int(re.findall(r'\d+', opt)[0]) for opt in option_carriers]
+                option_carriers_id = [int(re.findall(r'\d+', opt)[0]) for opt in opt_carriers]
             with delivery_type:
-                option_delivery_type = st.selectbox(
+                opt_delivery_type = st.selectbox(
                     "Chọn loại vận chuyển",
                     options=('Nội Miền', 'Cận Miền', 'Cách Miền', 'Nội Thành Tỉnh', 'Ngoại Thành Tỉnh', 'Nội Thành Tp.HCM - HN', 'Ngoại Thành Tp.HCM - HN'),
                     key='delivery_type'
@@ -181,14 +181,14 @@ if os.path.exists('./output/data_api.parquet'):
                 df_input = pd.DataFrame(data={
                     'order_id': [order_id],
                     'weight': [weight],
-                    'delivery_type': [option_delivery_type],
+                    'delivery_type': [opt_delivery_type],
                     'sender_province_id': [opt_sender_province_id],
                     'sender_district_id': [opt_sender_district_id],
                     'receiver_province_id': [opt_receiver_province_id],
                     'receiver_district_id': [opt_receiver_district_id],
                 })
 
-                df_st_output = out_data_final(df_input, carriers=option_carriers)
+                df_st_output = out_data_final(df_input, carriers=opt_carriers)
                 df_st_output = df_st_output[[
                     'order_id', 'carrier_id', 'order_type_id', 'sys_order_type_id',
                     'service_fee', 'carrier_status', 'carrier_status_comment',
