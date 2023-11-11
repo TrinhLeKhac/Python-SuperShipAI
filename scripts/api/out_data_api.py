@@ -66,7 +66,8 @@ def out_data_api(return_full_cols_df=False):
     qua_tai2 = qua_tai2[['receiver_province', 'receiver_district', 'carrier', 'status']].rename(
         columns={'status': 'carrier_status_comment'})
     qua_tai2.loc[
-        qua_tai2['carrier_status_comment'] == 'Loại', 'carrier_status_comment'] = 'Tổng số đánh giá ZNS 1, 2 sao >= 30% tổng đơn'
+        qua_tai2[
+            'carrier_status_comment'] == 'Loại', 'carrier_status_comment'] = 'Tổng số đánh giá ZNS 1, 2 sao >= 30% tổng đơn'
 
     qua_tai3 = ti_le_giao_hang.loc[
         ti_le_giao_hang['score'].isin(OVERLOADING_SCORE_DICT['Tỉ lệ hoàn hàng'])]
@@ -193,15 +194,27 @@ def out_data_api(return_full_cols_df=False):
             }), on=['receiver_province', 'receiver_district'], how='left'
         )
     )
-    print('8. Thông tin customer_best_carrier')
+    api_data_final['order_type_id'] = api_data_final['order_type'].map(MAPPING_ORDER_TYPE_ID)
+
+    print('8. Thông tin nhà vận chuyển nhanh nhất, hiệu quả nhất')
+    api_data_final["fastest_carrier_id"] = \
+        api_data_final.groupby(["receiver_province_id", "receiver_district_id", "order_type_id"])[
+            "estimate_delivery_time_details"].rank(method="dense", ascending=True)
+    api_data_final["fastest_carrier_id"] = api_data_final["fastest_carrier_id"].astype(int)
+
+    api_data_final["highest_score_carrier_id"] = \
+        api_data_final.groupby(["receiver_province_id", "receiver_district_id", "order_type_id"])["score"].rank(
+            method="dense", ascending=False)
+    api_data_final["highest_score_carrier_id"] = api_data_final["highest_score_carrier_id"].astype(int)
+
+    print('9. Thông tin customer_best_carrier')
     customer_best_carrier_df = customer_best_carrier(api_data_final, threshold=15)
     api_data_final = (
         api_data_final.merge(
             customer_best_carrier_df, on=['receiver_province', 'receiver_district', 'order_type'], how='left')
     )
-    api_data_final['customer_best_carrier'] = api_data_final['customer_best_carrier'].fillna(CUSTOMER_BEST_CARRIER_DEFAULT)
-
-    api_data_final['order_type_id'] = api_data_final['order_type'].map(MAPPING_ORDER_TYPE_ID)
+    api_data_final['customer_best_carrier'] = api_data_final['customer_best_carrier'].fillna(
+        CUSTOMER_BEST_CARRIER_DEFAULT)
     api_data_final['customer_best_carrier_id'] = api_data_final['customer_best_carrier'].map(MAPPING_CARRIER_ID)
 
     if return_full_cols_df:
@@ -210,6 +223,7 @@ def out_data_api(return_full_cols_df=False):
             'carrier_id', 'carrier', 'order_type', 'order_type_id', 'carrier_status', 'carrier_status_comment',
             'estimate_delivery_time_details', 'estimate_delivery_time',
             'customer_best_carrier', 'customer_best_carrier_id',
+            'fastest_carrier_id', 'highest_score_carrier_id',
             'total_order', 'delivery_success_rate', 'score', 'stars',
         ]]
         return api_data_final
@@ -218,6 +232,7 @@ def out_data_api(return_full_cols_df=False):
             'receiver_province_id', 'receiver_district_id',
             'carrier_id', 'order_type_id', 'carrier_status', 'carrier_status_comment',
             'estimate_delivery_time_details', 'estimate_delivery_time',
+            'fastest_carrier_id', 'highest_score_carrier_id',
             'customer_best_carrier_id', 'total_order', 'delivery_success_rate', 'score', 'stars',
         ]]
         print('9. Lưu dữ liệu API')
@@ -226,8 +241,6 @@ def out_data_api(return_full_cols_df=False):
 
         api_data_final.to_parquet('./output/data_api.parquet', index=False)
         print('>>> Done\n')
-
-        print('-' * 100)
 
 
 if __name__ == '__main__':

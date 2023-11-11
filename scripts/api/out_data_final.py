@@ -181,6 +181,7 @@ def combine_info_from_api(input_df):
                 'carrier_status', 'carrier_status_comment',
                 'estimate_delivery_time_details', 'estimate_delivery_time',
                 'customer_best_carrier', 'customer_best_carrier_id',
+                'fastest_carrier_id', 'highest_score_carrier_id',
                 'delivery_success_rate', 'score', 'stars', 'total_order',
             ]], on=['receiver_province_id', 'receiver_district_id', 'carrier_id', 'order_type_id'], how='left'
         )
@@ -253,13 +254,6 @@ def calculate_notification_v2(input_df):
     result_df = input_df.copy()
     result_df["cheapest_carrier_id"] = result_df.groupby("order_id")["service_fee"].rank(method="dense", ascending=True)
     result_df["cheapest_carrier_id"] = result_df["cheapest_carrier_id"].astype(int)
-
-    result_df["fastest_carrier_id"] = result_df.groupby("order_id")["estimate_delivery_time_details"].rank(
-        method="dense", ascending=True)
-    result_df["fastest_carrier_id"] = result_df["fastest_carrier_id"].astype(int)
-
-    result_df["highest_score_carrier_id"] = result_df.groupby("order_id")["score"].rank(method="dense", ascending=False)
-    result_df["highest_score_carrier_id"] = result_df["highest_score_carrier_id"].astype(int)
 
     return result_df
 
