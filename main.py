@@ -128,38 +128,38 @@ if os.path.exists('./output/data_api.parquet'):
             receiver_province, receiver_district = st.columns(2)
             with sender_province:
                 opt_sender_province = st.selectbox(
-                    "Chọn tỉnh thành giao hàng (ID)",
+                    "Chọn tỉnh thành giao hàng",
                     options=(pro_dis_df['province'].unique().tolist()),
-                    key='province',
+                    key='sender_province',
                 )
-                opt_sender_province_id = pro_dis_df.loc[pro_dis_df['province'] == opt_sender_province]['province_id']
+                opt_sender_province_id = pro_dis_df.loc[pro_dis_df['province'] == opt_sender_province]['province_id'].values[0]
             with sender_district:
                 opt_sender_district = st.selectbox(
-                    "Chọn quận huyện giao hàng (ID)",
+                    "Chọn quận huyện giao hàng",
                     options=(
                         pro_dis_df.loc[
                             pro_dis_df['province'] == opt_sender_province]
                         ['district'].unique()),
-                    key='district',
+                    key='sender_district',
                 )
-                opt_sender_district_id = pro_dis_df.loc[pro_dis_df['district'] == opt_sender_district]['district_id']
+                opt_sender_district_id = pro_dis_df.loc[pro_dis_df['district'] == opt_sender_district]['district_id'].values[0]
             with receiver_province:
                 opt_receiver_province = st.selectbox(
-                    "Chọn tỉnh thành giao hàng (ID)",
+                    "Chọn tỉnh thành nhận hàng",
                     options=(pro_dis_df['province'].unique().tolist()),
-                    key='province',
+                    key='receiver_province',
                 )
-                opt_receiver_province_id = pro_dis_df.loc[pro_dis_df['province'] == opt_receiver_province]['province_id']
+                opt_receiver_province_id = pro_dis_df.loc[pro_dis_df['province'] == opt_receiver_province]['province_id'].values[0]
             with receiver_district:
                 opt_receiver_district = st.selectbox(
-                    "Chọn quận huyện giao hàng (ID)",
+                    "Chọn quận huyện nhận hàng",
                     options=(
                         pro_dis_df.loc[
-                            pro_dis_df['province_id'] == opt_receiver_province]
-                        ['district_id'].unique()),
-                    key='district_id',
+                            pro_dis_df['province'] == opt_receiver_province]
+                        ['district'].unique()),
+                    key='receiver_district',
                 )
-                opt_receiver_district_id = pro_dis_df.loc[pro_dis_df['district'] == opt_receiver_district]['district_id']
+                opt_receiver_district_id = pro_dis_df.loc[pro_dis_df['district'] == opt_receiver_district]['district_id'].values[0]
 
             carrier_id, delivery_type = st.columns(2)
             with carrier_id:
@@ -178,30 +178,23 @@ if os.path.exists('./output/data_api.parquet'):
             weight = st.number_input('Nhập khối lượng đơn (<= 50,000g): ', key='weight')
 
             if order_id != '' and (weight > 0):
-                print(order_id)
-                print(weight)
-                print(opt_sender_province)
-                print(opt_sender_district)
-                print(opt_receiver_province)
-                print(opt_receiver_district)
-                print(option_carriers)
-                print(option_delivery_type)
                 df_input = pd.DataFrame(data={
-                    'order_id': order_id,
-                    'weight': weight,
-                    'delivery_type': option_delivery_type,
-                    'sender_province_id': opt_sender_province,
-                    'sender_district_id': opt_sender_district,
-                    'receiver_province_id': opt_receiver_province,
-                    'receiver_district_id': opt_receiver_district,
+                    'order_id': [order_id],
+                    'weight': [weight],
+                    'delivery_type': [option_delivery_type],
+                    'sender_province_id': [opt_sender_province_id],
+                    'sender_district_id': [opt_sender_district_id],
+                    'receiver_province_id': [opt_receiver_province_id],
+                    'receiver_district_id': [opt_receiver_district_id],
                 })
 
-                df_st_output = out_data_final(df_input)
-                df_st_output = df_st_output.loc[df_st_output['carrier'].isin(option_carriers)]
+                df_st_output = out_data_final(df_input, carriers=option_carriers)
                 df_st_output = df_st_output[[
-                    'order_id', 'carrier', 'service_fee', 'status_carrier_comment',
-                    'estimate_delivery_time', 'delivery_success_rate', 'customer_best_carrier', 'partner_best_carrier',
-                    'cheapest_carrier', 'fastest_carrier', 'highest_score_carrier',
+                    'order_id', 'carrier_id', 'order_type_id', 'sys_order_type_id',
+                    'service_fee', 'carrier_status', 'carrier_status_comment',
+                    'estimate_delivery_time_details', 'estimate_delivery_time', 'delivery_success_rate',
+                    'customer_best_carrier_id', 'partner_best_carrier_id',
+                    'cheapest_carrier_id', 'fastest_carrier_id', 'highest_score_carrier_id',
                     'score', 'stars',
                 ]]
                 if len(df_st_output) > 0:
@@ -209,16 +202,20 @@ if os.path.exists('./output/data_api.parquet'):
                         df_st_output,
                         column_config={
                             "order_id": "Mã đơn hàng",
-                            "carrier": "Nhà vận chuyển",
+                            "carrier_id": "ID của Nhà vận chuyển",
+                            "order_type_id": "ID Loại vận chuyển",
+                            "system_order_type_id": "ID Loại vận chuyển (sys)",
                             "service_fee": "Tiền cước",
-                            "status_carrier_comment": "Trạng thái nhà vận chuyển",
+                            "status_carrier": "Trạng thái nhà vận chuyển",
+                            "status_carrier_comment": "Trạng thái nhà vận chuyển (comment)",
+                            "estimate_delivery_time_details": "Thời gian giao dự kiến (dạng thập phân)",
                             "estimate_delivery_time": "Thời gian giao dự kiến",
                             "delivery_success_rate": 'Tỉ lệ giao thành công',
                             "customer_best_carrier": "NVC tốt nhất cho Khách hàng",
                             "partner_best_carrier": "NVC tốt nhất cho Đối tác",
-                            "cheapest_carrier": "NVC rẻ nhất",
-                            "fastest_carrier": "NVC nhanh nhất",
-                            "highest_score_carrier": "NVC hiệu quả nhất",
+                            "cheapest_carrier_id": "Ranking NVC (tiêu chí Rẻ nhất)",
+                            "fastest_carrier_id": "Ranking NVC (tiêu chí Nhanh nhất)",
+                            "highest_score_carrier_id": "Ranking NVC (Tiêu chí Hiệu quả nhất)",
                             "score": "Score đánh giá",
                             "stars": st.column_config.NumberColumn(
                                 "Phân loại",

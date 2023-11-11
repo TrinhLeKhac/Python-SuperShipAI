@@ -17,7 +17,8 @@ API_FULL_COLS = [
 ]
 API_COLS = [
     'order_id', 'carrier_id', 'order_type_id', 'sys_order_type_id', 'service_fee',
-    'carrier_status', 'estimate_delivery_time_details', 'estimate_delivery_time', 'delivery_success_rate',
+    'carrier_status', 'carrier_status_comment',
+    'estimate_delivery_time_details', 'estimate_delivery_time', 'delivery_success_rate',
     'customer_best_carrier_id', 'partner_best_carrier_id', 'score', 'stars',
     'cheapest_carrier_id', 'fastest_carrier_id', 'highest_score_carrier_id',
     # 'notification',
@@ -126,8 +127,8 @@ def generate_sample_input(n_rows=1000):
     ]]
 
 
-def generate_order_type(input_df):
-    result_df = input_df.merge(pd.DataFrame(data={'carrier': ACTIVE_CARRIER}), how='cross')
+def generate_order_type(input_df, carriers=ACTIVE_CARRIER):
+    result_df = input_df.merge(pd.DataFrame(data={'carrier': carriers}), how='cross')
     result_df['carrier_id'] = result_df['carrier'].map(MAPPING_CARRIER_ID)
     result_df = (
         result_df
@@ -286,7 +287,7 @@ def partner_best_carrier(data_api_df, threshold=15):
     return partner_best_carrier_df
 
 
-def out_data_final(input_df=None):
+def out_data_final(input_df=None, carriers=ACTIVE_CARRIER):
     if input_df is None:
         giao_dich_valid = pd.read_parquet('./processed_data/giao_dich_combine_valid.parquet')
         giao_dich_valid = giao_dich_valid[[
@@ -320,8 +321,8 @@ def out_data_final(input_df=None):
         print('Số dòng: ', len(focus_df))
     else:
         focus_df = input_df.copy()
-    tmp_df1 = generate_order_type(focus_df)
-    assert len(tmp_df1) == len(focus_df) * len(ACTIVE_CARRIER), 'Transform data sai'
+    tmp_df1 = generate_order_type(focus_df, carriers=carriers)
+    # assert len(tmp_df1) == len(focus_df) * len(ACTIVE_CARRIER), 'Transform data sai'
 
     tmp_df2 = combine_info_from_api(tmp_df1)
     assert len(tmp_df2) == len(tmp_df1), 'Transform data sai'
