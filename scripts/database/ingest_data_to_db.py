@@ -8,7 +8,6 @@ def ingest_data_to_db():
     engine = create_engine(port)
 
     print('>>> Ingest data đã qua xử lý...')
-    processed_data_path = './processed_data'
     for f, schema in TABLE_SCHEMA.items():
         if f not in ['data_api', 'data_api_full', 'data_check_output']:
             tmp_df = pd.read_parquet('./processed_data/{}.parquet'.format(f))
