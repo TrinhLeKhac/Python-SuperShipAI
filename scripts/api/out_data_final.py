@@ -191,10 +191,17 @@ def combine_info_from_api(input_df):
 
 
 def calculate_service_fee(input_df):
+    """
+    Note:
+        service_fee tính theo cách join với bảng cước phí,
+        sau đó filter lại giá trị trong ngưỡng
+        bị Lỗi ArrayMemoryError khi chạy local (không đủ memory để chạy)
+    """
     cuoc_phi_df = pd.read_parquet('./processed_data/cuoc_phi.parquet')
     cuoc_phi_df = cuoc_phi_df[['carrier', 'order_type', 'gt', 'lt_or_eq', 'service_fee']]
 
     # 3. Tổng hợp
+    input_df.loc[input_df['weight'] > 50000, 'weight'] = 50000
     result_df = input_df.merge(cuoc_phi_df, on=['carrier', 'order_type'], how='inner')
     result_df = result_df.loc[
         (result_df['weight'] > result_df['gt']) &
