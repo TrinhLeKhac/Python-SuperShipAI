@@ -225,6 +225,46 @@ def calculate_service_fee(input_df):
     return result_df.drop(['gt', 'lt_or_eq'], axis=1)
 
 
+def get_cuoc_phi(cuoc_phi_df, carrier, order_type, weight):
+    service_fee = cuoc_phi_df.loc[
+        (cuoc_phi_df['carrier'] == carrier)
+        & (cuoc_phi_df['order_type'] == order_type)
+        & (cuoc_phi_df['gt'] < weight)
+        & (cuoc_phi_df['lt_or_eq'] >= weight)
+        ]['service_fee'].values[0]
+    return service_fee
+
+
+def calculate_service_fee_v2(input_df):
+
+    cuoc_phi_df = pd.read_parquet('./processed_data/cuoc_phi.parquet')
+    cuoc_phi_df = cuoc_phi_df[['carrier', 'order_type', 'gt', 'lt_or_eq', 'service_fee']]
+
+    # 3. Tổng hợp
+    input_df.loc[input_df['weight'] > 50000, 'weight'] = 50000
+    result_df = input_df.copy()
+    result_df['service_fee'] = result_df.apply(
+        lambda s: get_cuoc_phi(cuoc_phi_df, s['carrier'], s['order_type'], s['weight']),
+        axis=1
+    )
+
+    # Ninja Van lấy tận nơi cộng cước phí 1,500
+    result_df.loc[
+        result_df['carrier'].isin(['Ninja Van']) &
+        result_df['delivery_type'].isin(['Lấy Tận Nơi']),
+        'service_fee'
+    ] = result_df['service_fee'] + 1500
+
+    # GHN lấy tận nơi cộng cước phí 1,000
+    result_df.loc[
+        result_df['carrier'].isin(['GHN']) &
+        result_df['delivery_type'].isin(['Lấy Tận Nơi']),
+        'service_fee'
+    ] = result_df['service_fee'] + 1000
+
+    return result_df.drop(['gt', 'lt_or_eq'], axis=1)
+
+
 def calculate_notification(input_df):
     re_nhat_df = input_df.groupby(['order_id'])['service_fee'].min().reset_index()
     re_nhat_df['notification'] = 'Rẻ nhất'
@@ -334,7 +374,7 @@ def out_data_final(input_df=None, carriers=ACTIVE_CARRIER):
     tmp_df2 = combine_info_from_api(tmp_df1)
     assert len(tmp_df2) == len(tmp_df1), 'Transform data sai'
 
-    tmp_df3 = calculate_service_fee(tmp_df2)
+    tmp_df3 = calculate_service_fee_v2(tmp_df2)
     assert len(tmp_df3) == len(tmp_df2), 'Transform data sai'
 
     tmp_df4 = calculate_notification_v2(tmp_df3)
