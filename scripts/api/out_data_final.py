@@ -373,7 +373,10 @@ def out_data_final(input_df=None, carriers=ACTIVE_CARRIER, show_logs=False):
     assert len(tmp_df2) == len(tmp_df1), 'Transform data sai'
 
     print('iii. Tính phí dịch vụ')
-    tmp_df3 = calculate_service_fee_v2(tmp_df2)
+    if input_df is None:
+        tmp_df3 = calculate_service_fee_v2(tmp_df2)
+    else:
+        tmp_df3 = calculate_service_fee(tmp_df2)
     assert len(tmp_df3) == len(tmp_df2), 'Transform data sai'
 
     print('iv. Tính ranking nhà vận chuyển theo tiêu chí rẻ nhất')

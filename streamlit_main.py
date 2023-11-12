@@ -188,7 +188,7 @@ if os.path.exists('./output/data_api.parquet'):
                     'receiver_district_id': [opt_receiver_district_id],
                 })
 
-                df_st_output = out_data_final(df_input, carriers=opt_carriers)
+                df_st_output = out_data_final(df_input, carriers=opt_carriers, show_logs=False)
                 df_st_output["fastest_carrier_id"] = df_st_output["estimate_delivery_time_details"].rank(
                     method="dense", ascending=True)
                 df_st_output["fastest_carrier_id"] = df_st_output["fastest_carrier_id"].astype(int)
