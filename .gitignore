@@ -1,8 +1,9 @@
-/build
-/dist
+/.idea
 /input
 /output
 /processed_data
-/raw_data_excel_supership
+/raw_data
+/venv
+/build
+/dist
 /supership_ai.egg-info
-/supership_ai_venv
