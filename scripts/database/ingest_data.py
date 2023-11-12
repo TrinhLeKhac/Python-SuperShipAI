@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from scripts.api.out_data_final import *
-from scripts.database.dtypes import *
+from scripts.database.schemas import *
 
 
 def ingest_data_to_db():

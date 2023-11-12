@@ -158,11 +158,11 @@ def out_data_api(return_full_cols_df=False, show_logs=True):
     score_final['score'] = (score_final['score'] - q_lower) / (q_upper - q_lower)
     score_final['score'] = np.round(score_final['score'], 2)
 
-    score_final['stars'] = 1
-    score_final.loc[score_final['score'] > 0.15, 'stars'] = 2
-    score_final.loc[score_final['score'] > 0.3, 'stars'] = 3
-    score_final.loc[score_final['score'] > 0.5, 'stars'] = 4
-    score_final.loc[score_final['score'] > 0.8, 'stars'] = 5
+    # score_final['stars'] = 1
+    # score_final.loc[score_final['score'] > 0.15, 'stars'] = 2
+    # score_final.loc[score_final['score'] > 0.3, 'stars'] = 3
+    # score_final.loc[score_final['score'] > 0.5, 'stars'] = 4
+    # score_final.loc[score_final['score'] > 0.8, 'stars'] = 5
 
     if show_logs:
         print('5. Combine api data')
@@ -223,6 +223,16 @@ def out_data_api(return_full_cols_df=False, show_logs=True):
     api_data_final['customer_best_carrier'] = api_data_final['customer_best_carrier'].fillna(
         CUSTOMER_BEST_CARRIER_DEFAULT)
     api_data_final['customer_best_carrier_id'] = api_data_final['customer_best_carrier'].map(MAPPING_CARRIER_ID)
+
+    if show_logs:
+        print('9. Thông tin số sao đánh giá của khách hàng')
+    zns_df = pd.read_parquet('./processed_data/danh_gia_zns.parquet')
+    zns_df = zns_df.groupby(['receiver_province', 'receiver_district', 'carrier']).agg(
+        stars=('n_stars', 'mean')).reset_index()
+    zns_df['stars'] = np.round(zns_df['stars'], 1)
+
+    api_data_final = api_data_final.merge(zns_df, on=['receiver_province', 'receiver_district', 'carrier'], how='left')
+    api_data_final['stars'] = api_data_final['stars'].fillna(5.0)
 
     if return_full_cols_df:
         api_data_final = api_data_final[[
