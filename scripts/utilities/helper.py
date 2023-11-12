@@ -4,6 +4,7 @@ import requests
 import json
 from unidecode import unidecode
 from scripts.utilities.config import *
+import streamlit as st
 from functools import reduce
 from datetime import datetime
 from time import time
