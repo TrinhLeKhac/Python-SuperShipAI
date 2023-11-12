@@ -335,7 +335,7 @@ def out_data_final(input_df=None, carriers=ACTIVE_CARRIER):
     assert len(tmp_df2) == len(tmp_df1), 'Transform data sai'
 
     tmp_df3 = calculate_service_fee(tmp_df2)
-    # assert len(tmp_df3) == len(tmp_df2), 'Transform data sai'
+    assert len(tmp_df3) == len(tmp_df2), 'Transform data sai'
 
     tmp_df4 = calculate_notification_v2(tmp_df3)
     assert len(tmp_df4) == len(tmp_df3), 'Transform data sai'
