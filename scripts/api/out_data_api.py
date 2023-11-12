@@ -47,16 +47,18 @@ def customer_best_carrier(data_api_df, threshold=15):
     return customer_best_carrier_df
 
 
-def out_data_api(return_full_cols_df=False):
-    print('1. Lấy toàn bộ data')
+def out_data_api(return_full_cols_df=False, show_logs=True):
+    if show_logs:
+        print('1. Transform dữ liệu...')
     (
         ngung_giao_nhan, danh_gia_zns,
         ti_le_giao_hang, chat_luong_noi_bo,
         thoi_gian_giao_hang, kho_giao_nhan,
         # tien_giao_dich
-    ) = total_transform()
+    ) = total_transform(show_logs=False)
 
-    print('2. Tính toán quận huyện quá tải')
+    if show_logs:
+        print('2. Tính toán quận huyện quá tải')
     qua_tai1 = ngung_giao_nhan.loc[ngung_giao_nhan['score'].isin(OVERLOADING_SCORE_DICT['Ngưng giao nhận'])]
     qua_tai1 = qua_tai1[['receiver_province', 'receiver_district', 'carrier', 'status']].rename(
         columns={'status': 'carrier_status_comment'})
@@ -90,7 +92,8 @@ def out_data_api(return_full_cols_df=False):
             .reset_index()
     )
 
-    print('3. Xử lý data thời gian giao dịch')
+    if show_logs:
+        print('3. Xử lý data thời gian giao dịch')
     thoi_gian_giao_hang = thoi_gian_giao_hang.rename(columns={'delivery_time_mean_h': 'estimate_delivery_time_details'})
     thoi_gian_giao_hang['estimate_delivery_time_details'] = np.round(
         thoi_gian_giao_hang['estimate_delivery_time_details'] / 24, 2)
@@ -134,7 +137,8 @@ def out_data_api(return_full_cols_df=False):
         'estimate_delivery_time_details'
     ] = thoi_gian_giao_hang_final['default_delivery_time_details']
 
-    print('4. Xủ lý score')
+    if show_logs:
+        print('4. Xủ lý score')
     score_df_list = []
 
     for target_df in [danh_gia_zns, ti_le_giao_hang, chat_luong_noi_bo, thoi_gian_giao_hang, kho_giao_nhan]:
@@ -160,8 +164,8 @@ def out_data_api(return_full_cols_df=False):
     score_final.loc[score_final['score'] > 0.5, 'stars'] = 4
     score_final.loc[score_final['score'] > 0.8, 'stars'] = 5
 
-    # 6. Combine api data
-    print('6. Combine api data')
+    if show_logs:
+        print('5. Combine api data')
     api_data_final = (
         thoi_gian_giao_hang_final[[
             'receiver_province', 'receiver_district', 'carrier', 'order_type',
@@ -176,7 +180,8 @@ def out_data_api(return_full_cols_df=False):
     )
     api_data_final['delivery_success_rate'] = np.round(api_data_final['delivery_success_rate'] * 100, 2)
 
-    print('7. Gắn thông tin quá tải')
+    if show_logs:
+        print('6. Gắn thông tin quá tải')
     api_data_final = api_data_final.merge(qua_tai, on=['receiver_province', 'receiver_district', 'carrier'], how='left')
     api_data_final['carrier_status_comment'] = api_data_final['carrier_status_comment'].fillna('Bình thường')
     api_data_final['carrier_status'] = 0
@@ -196,7 +201,8 @@ def out_data_api(return_full_cols_df=False):
     )
     api_data_final['order_type_id'] = api_data_final['order_type'].map(MAPPING_ORDER_TYPE_ID)
 
-    print('8. Thông tin nhà vận chuyển nhanh nhất, hiệu quả nhất')
+    if show_logs:
+        print('7. Thông tin nhà vận chuyển nhanh nhất, hiệu quả nhất')
     api_data_final["fastest_carrier_id"] = \
         api_data_final.groupby(["receiver_province_id", "receiver_district_id", "order_type_id"])[
             "estimate_delivery_time_details"].rank(method="dense", ascending=True)
@@ -207,7 +213,8 @@ def out_data_api(return_full_cols_df=False):
             method="dense", ascending=False)
     api_data_final["highest_score_carrier_id"] = api_data_final["highest_score_carrier_id"].astype(int)
 
-    print('9. Thông tin customer_best_carrier')
+    if show_logs:
+        print('8. Thông tin customer_best_carrier')
     customer_best_carrier_df = customer_best_carrier(api_data_final, threshold=15)
     api_data_final = (
         api_data_final.merge(
@@ -235,11 +242,13 @@ def out_data_api(return_full_cols_df=False):
             'fastest_carrier_id', 'highest_score_carrier_id',
             'customer_best_carrier_id', 'total_order', 'delivery_success_rate', 'score', 'stars',
         ]]
-        print('9. Lưu dữ liệu API')
+        if show_logs:
+            print('9. Lưu dữ liệu API')
         with open('./output/data_api.json', 'w', encoding='utf-8') as file:
             api_data_final.to_json(file, force_ascii=False)
 
         api_data_final.to_parquet('./output/data_api.parquet', index=False)
+    if show_logs:
         print('>>> Done\n')
 
 

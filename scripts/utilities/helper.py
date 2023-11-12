@@ -9,6 +9,8 @@ from datetime import datetime
 from time import time
 import re
 import os
+import warnings
+warnings.filterwarnings("ignore")
 
 
 def convert_time_m_s(stop, start):

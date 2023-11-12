@@ -22,7 +22,7 @@ def ingest_data_to_db():
     print('-' * 100)
 
     print('>>> Ingest output API full')
-    data_api_full_df = out_data_api(return_full_cols_df=True)
+    data_api_full_df = out_data_api(return_full_cols_df=True, show_logs=False)
     data_api_full_df.to_sql(name='data_api_full', con=engine, schema="db_schema", if_exists="replace", index=False,
                             dtype=TABLE_SCHEMA['data_api_full'])
     print('-' * 100)
@@ -31,11 +31,13 @@ def ingest_data_to_db():
     if os.path.exists('./output/data_check_output.parquet'):
         check_df = pd.read_parquet('./output/data_check_output.parquet')
     else:
-        check_df = out_data_final()
+        print('>>>>>> Out data check output')
+        check_df = out_data_final(show_logs=False)
 
+    print('>>> Ghi thông tin vào DB')
     check_df.to_sql(name='data_check_output', con=engine, schema="db_schema", if_exists="replace", index=False,
                     dtype=TABLE_SCHEMA['data_check_output'])
-    print('-' * 100)
+    print('>>> Done')
 
 
 if __name__ == '__main__':

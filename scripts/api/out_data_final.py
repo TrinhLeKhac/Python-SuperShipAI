@@ -13,7 +13,6 @@ API_FULL_COLS = [
     'customer_best_carrier_id', 'customer_best_carrier',
     'partner_best_carrier_id', 'partner_best_carrier', 'score', 'stars',
     'cheapest_carrier_id', 'fastest_carrier_id', 'highest_score_carrier_id',
-    # 'notification',
 ]
 API_COLS = [
     'order_id', 'carrier_id', 'order_type_id', 'sys_order_type_id', 'service_fee',
@@ -21,7 +20,6 @@ API_COLS = [
     'estimate_delivery_time_details', 'estimate_delivery_time', 'delivery_success_rate',
     'customer_best_carrier_id', 'partner_best_carrier_id', 'score', 'stars',
     'cheapest_carrier_id', 'fastest_carrier_id', 'highest_score_carrier_id',
-    # 'notification',
 ]
 
 
@@ -172,9 +170,8 @@ def generate_order_type(input_df, carriers=ACTIVE_CARRIER):
     ], axis=1)
 
 
-def combine_info_from_api(input_df):
-    # api_data_final = pd.read_parquet('./output/data_api.parquet')
-    api_data_final = out_data_api(return_full_cols_df=True)
+def combine_info_from_api(input_df, show_logs=False):
+    api_data_final = out_data_api(return_full_cols_df=True, show_logs=show_logs)
     result_df = (
         input_df.merge(
             api_data_final[[
@@ -200,7 +197,6 @@ def calculate_service_fee(input_df):
     cuoc_phi_df = pd.read_parquet('./processed_data/cuoc_phi.parquet')
     cuoc_phi_df = cuoc_phi_df[['carrier', 'order_type', 'gt', 'lt_or_eq', 'service_fee']]
 
-    # 3. Tổng hợp
     input_df.loc[input_df['weight'] > 50000, 'weight'] = 50000
     result_df = input_df.merge(cuoc_phi_df, on=['carrier', 'order_type'], how='inner')
     result_df = result_df.loc[
@@ -236,11 +232,9 @@ def get_cuoc_phi(cuoc_phi_df, carrier, order_type, weight):
 
 
 def calculate_service_fee_v2(input_df):
-
     cuoc_phi_df = pd.read_parquet('./processed_data/cuoc_phi.parquet')
     cuoc_phi_df = cuoc_phi_df[['carrier', 'order_type', 'gt', 'lt_or_eq', 'service_fee']]
 
-    # 3. Tổng hợp
     input_df.loc[input_df['weight'] > 50000, 'weight'] = 50000
     result_df = input_df.copy()
     result_df['service_fee'] = result_df.apply(
@@ -268,6 +262,7 @@ def calculate_service_fee_v2(input_df):
 def calculate_notification(input_df):
     re_nhat_df = input_df.groupby(['order_id'])['service_fee'].min().reset_index()
     re_nhat_df['notification'] = 'Rẻ nhất'
+
     # Gắn ngược lại để lấy đủ row (trong trường hợp có nhiều carrier cùng mức giá
     re_nhat_df = re_nhat_df.merge(input_df, on=['order_id', 'service_fee'], how='inner')
 
@@ -334,7 +329,7 @@ def partner_best_carrier(data_api_df, threshold=15):
     return partner_best_carrier_df
 
 
-def out_data_final(input_df=None, carriers=ACTIVE_CARRIER):
+def out_data_final(input_df=None, carriers=ACTIVE_CARRIER, show_logs=False):
     if input_df is None:
         giao_dich_valid = pd.read_parquet('./processed_data/giao_dich_combine_valid.parquet')
         giao_dich_valid = giao_dich_valid[[
@@ -365,29 +360,27 @@ def out_data_final(input_df=None, carriers=ACTIVE_CARRIER):
         focus_df['delivery_type'] = focus_df['delivery_type'].fillna('Gửi Bưu Cục')
 
         assert len(giao_dich_valid) == len(focus_df), 'Transform data sai'
-        print('Số dòng: ', len(focus_df))
     else:
         focus_df = input_df.copy()
+    print('Số dòng input dữ liệu: ', len(focus_df))
 
-    print('\n')
-    print('-' * 100)
-    print('Tính toán order_type')
+    print('i. Tính toán order_type')
     tmp_df1 = generate_order_type(focus_df, carriers=carriers)
     assert len(tmp_df1) == len(focus_df) * len(carriers), 'Transform data sai'
 
-    print('Gắn thông tin tính toán từ API')
-    tmp_df2 = combine_info_from_api(tmp_df1)
+    print('ii. Gắn thông tin tính toán từ API')
+    tmp_df2 = combine_info_from_api(tmp_df1, show_logs=show_logs)
     assert len(tmp_df2) == len(tmp_df1), 'Transform data sai'
 
-    print('Tính phí dịch vụ')
+    print('iii. Tính phí dịch vụ')
     tmp_df3 = calculate_service_fee_v2(tmp_df2)
     assert len(tmp_df3) == len(tmp_df2), 'Transform data sai'
 
-    print('Tính ranking nhà vận chuyển theo tiêu chí rẻ nhất')
+    print('iv. Tính ranking nhà vận chuyển theo tiêu chí rẻ nhất')
     tmp_df4 = calculate_notification_v2(tmp_df3)
     assert len(tmp_df4) == len(tmp_df3), 'Transform data sai'
 
-    print('Tính nhà vận chuyển tốt nhất cho đối tác')
+    print('v. Tính nhà vận chuyển tốt nhất cho đối tác')
     partner_best_carrier_df = partner_best_carrier(tmp_df4)
     final_df = (
         tmp_df4.merge(
@@ -398,18 +391,15 @@ def out_data_final(input_df=None, carriers=ACTIVE_CARRIER):
     )
     assert len(final_df) == len(tmp_df4), 'Transform data sai'
     if input_df is None:
-        print('Lưu data tính toán...')
+        print('vi. Lưu data tính toán...')
         final_df = final_df[API_FULL_COLS]
         final_df.to_parquet('./output/data_check_output.parquet')
         # final_df.to_excel('./output/data_check_output.xlsx')
-        print('Done')
     else:
         final_df = final_df[API_COLS]
+    print('-' * 100)
 
     return final_df
-
-    print('>>> Done\n')
-    print('-' * 100)
 
 
 if __name__ == '__main__':

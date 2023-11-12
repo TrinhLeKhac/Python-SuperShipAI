@@ -5,7 +5,7 @@ import pandas as pd
 
 @st.cache_data
 def st_get_data_api_final():
-    return pd.read_parquet('./output/data_check_output.parquet')
+    return pd.read_parquet('./output/data_check_output_backup.parquet')
 
 
 @st.cache_data

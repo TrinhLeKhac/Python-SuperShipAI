@@ -20,16 +20,14 @@ def status_chat_luong_noi_bo_ninja_van(series, col1='delivery_success_rate', col
 
 
 def transform_data_chat_luong_noi_bo():
-    print('1. Loading dữ liệu...')
+
     chat_luong_noi_bo_df = pd.read_parquet('./processed_data/chat_luong_noi_bo_njv.parquet')
 
-    print('2. Mapping status và score...')
     chat_luong_noi_bo_df['status'] = chat_luong_noi_bo_df.apply(status_chat_luong_noi_bo_ninja_van, axis=1)
     chat_luong_noi_bo_df['score'] = (
         chat_luong_noi_bo_df['status'].map(TRONG_SO['Chất lượng nội bộ']['Phân loại']['Ninja Van'])
     )
 
-    print('3. Filling giá trị mặc định...')
     chat_luong_noi_bo_df = (
         chat_luong_noi_bo_df.merge(
             PROVINCE_MAPPING_DISTRICT_DF[['province', 'district']].rename(columns={
