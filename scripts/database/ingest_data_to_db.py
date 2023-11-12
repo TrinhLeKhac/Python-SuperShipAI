@@ -4,7 +4,7 @@ from scripts.database.dtypes import *
 
 
 def ingest_data_to_db():
-    port = create_engine('postgresql://postgres:123456@localhost:5432/supership_ai_db')
+    port = 'postgresql://postgres:123456@localhost:5432/supership_ai_db'
     engine = create_engine(port)
 
     print('1. Ingest processed_data...')
