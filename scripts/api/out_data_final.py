@@ -9,7 +9,7 @@ API_FULL_COLS = [
     'carrier_id', 'carrier', 'order_type', 'order_type_id', 'sys_order_type_id',
     'weight', 'service_fee', 'delivery_type',
     'carrier_status', 'carrier_status_comment',
-    'estimate_delivery_time_details', 'estimate_delivery_time', 'delivery_success_rate',
+    'estimate_delivery_time_details', 'estimate_delivery_time', 'delivery_success_rate', 'delivery_success_rate_id',
     'customer_best_carrier_id', 'customer_best_carrier',
     'partner_best_carrier_id', 'partner_best_carrier', 'score', 'stars',
     'cheapest_carrier_id', 'fastest_carrier_id', 'highest_score_carrier_id',
