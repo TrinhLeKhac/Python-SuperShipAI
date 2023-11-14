@@ -301,7 +301,7 @@ def calculate_notification_v2(input_df):
     return result_df
 
 
-def partner_best_carrier(data_api_df, threshold=15):
+def partner_best_carrier_old(data_api_df, threshold=15):
     df1 = data_api_df.loc[data_api_df['total_order'] > threshold]
     df2 = data_api_df.loc[(data_api_df['total_order'] >= 1) & (data_api_df['total_order'] <= threshold)]
     df3 = data_api_df.loc[data_api_df['total_order'] == 0]
@@ -327,6 +327,23 @@ def partner_best_carrier(data_api_df, threshold=15):
         MAPPING_CARRIER_ID)
 
     return partner_best_carrier_df
+
+
+def partner_best_carrier(data_api_df):
+    data_api_df['wscore'] = data_api_df['cheapest_carrier_id'] * 1.4 + data_api_df['delivery_success_rate_id'] * 1.2 + \
+                            data_api_df['highest_score_carrier_id']
+    partner_best_carrier = (
+        data_api_df.sort_values([
+            'receiver_province_id', 'receiver_district_id', 'order_type_id', 'wscore'
+        ]).drop_duplicates(['receiver_province_id', 'receiver_district_id', 'order_type_id'])
+        [['receiver_province_id', 'receiver_district_id', 'order_type_id', 'carrier']]
+            .rename(columns={'carrier': 'customer_best_carrier'})
+    )
+    data_api_df = data_api_df.merge(partner_best_carrier,
+                                    on=['receiver_province_id', 'receiver_district_id', 'order_type_id'], how='inner')
+    data_api_df['partner_best_carrier_id'] = data_api_df['partner_best_carrier'].map(MAPPING_CARRIER_ID)
+
+    return data_api_df.drop(['wscore'], axis=1)
 
 
 def out_data_final(input_df=None, carriers=ACTIVE_CARRIER, show_logs=False):
@@ -384,15 +401,9 @@ def out_data_final(input_df=None, carriers=ACTIVE_CARRIER, show_logs=False):
     assert len(tmp_df4) == len(tmp_df3), 'Transform data sai'
 
     print('v. Tính nhà vận chuyển tốt nhất cho đối tác')
-    partner_best_carrier_df = partner_best_carrier(tmp_df4)
-    final_df = (
-        tmp_df4.merge(
-            partner_best_carrier_df,
-            on=['receiver_province', 'receiver_district', 'order_type'],
-            how='inner'
-        )
-    )
+    final_df = partner_best_carrier(tmp_df4)
     assert len(final_df) == len(tmp_df4), 'Transform data sai'
+
     if input_df is None:
         print('vi. Lưu data tính toán...')
         final_df = final_df[API_FULL_COLS]
