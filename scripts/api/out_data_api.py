@@ -27,13 +27,13 @@ def customer_best_carrier(data_api_df, threshold=15):
     df3 = data_api_df.loc[data_api_df['total_order'] == 0]
 
     group1 = (
-        df1.sort_values(['delivery_success_rate', 'estimate_delivery_time_details'], ascending=[False, False])
+        df1.sort_values(['delivery_success_rate', 'estimate_delivery_time_details'], ascending=[False, True])
             .drop_duplicates(['receiver_province', 'receiver_district', 'order_type'], keep='first')
         [['receiver_province', 'receiver_district', 'order_type', 'carrier']]
             .rename(columns={'carrier': 'customer_best_carrier'})
     )
     group2 = (
-        df2.sort_values(['estimate_delivery_time_details', 'delivery_success_rate'], ascending=[False, False])
+        df2.sort_values(['estimate_delivery_time_details', 'delivery_success_rate'], ascending=[True, False])
             .drop_duplicates(['receiver_province', 'receiver_district', 'order_type'], keep='first')
         [['receiver_province', 'receiver_district', 'order_type', 'carrier']]
             .rename(columns={'carrier': 'customer_best_carrier'})

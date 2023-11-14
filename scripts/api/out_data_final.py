@@ -307,13 +307,13 @@ def partner_best_carrier(data_api_df, threshold=15):
     df3 = data_api_df.loc[data_api_df['total_order'] == 0]
 
     group1 = (
-        df1.sort_values(['service_fee', 'delivery_success_rate'], ascending=[False, False])
+        df1.sort_values(['service_fee', 'delivery_success_rate'], ascending=[True, False])
             .drop_duplicates(['receiver_province', 'receiver_district', 'order_type'], keep='first')
         [['receiver_province', 'receiver_district', 'order_type', 'carrier']]
             .rename(columns={'carrier': 'partner_best_carrier'})
     )
     group2 = (
-        df2.sort_values(['delivery_success_rate', 'service_fee'], ascending=[False, False])
+        df2.sort_values(['delivery_success_rate', 'service_fee'], ascending=[False, True])
             .drop_duplicates(['receiver_province', 'receiver_district', 'order_type'], keep='first')
         [['receiver_province', 'receiver_district', 'order_type', 'carrier']]
             .rename(columns={'carrier': 'partner_best_carrier'})
