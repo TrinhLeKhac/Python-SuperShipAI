@@ -255,7 +255,8 @@ def out_data_api(return_full_cols_df=False, show_logs=True):
             'estimate_delivery_time_details', 'estimate_delivery_time',
             'customer_best_carrier', 'customer_best_carrier_id',
             'fastest_carrier_id', 'highest_score_carrier_id',
-            'total_order', 'delivery_success_rate', 'score', 'stars',
+            'total_order', 'delivery_success_rate',
+            'delivery_success_rate_id', 'score', 'stars',
         ]]
         return api_data_final
     else:
@@ -264,7 +265,8 @@ def out_data_api(return_full_cols_df=False, show_logs=True):
             'carrier_id', 'order_type_id', 'carrier_status', 'carrier_status_comment',
             'estimate_delivery_time_details', 'estimate_delivery_time',
             'fastest_carrier_id', 'highest_score_carrier_id',
-            'customer_best_carrier_id', 'total_order', 'delivery_success_rate', 'score', 'stars',
+            'customer_best_carrier_id', 'total_order', 'delivery_success_rate',
+            'delivery_success_rate_id', 'score', 'stars',
         ]]
         if show_logs:
             print('9. Lưu dữ liệu API')
