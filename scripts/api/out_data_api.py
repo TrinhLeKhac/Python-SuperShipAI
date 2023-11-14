@@ -65,7 +65,7 @@ def customer_best_carrier(data_api_df):
                                     on=['receiver_province_id', 'receiver_district_id', 'order_type_id'], how='inner')
     data_api_df['customer_best_carrier_id'] = data_api_df['customer_best_carrier'].map(MAPPING_CARRIER_ID)
 
-    return data_api_df.drop(['combine_col', 'delivery_success_rate_id', 'wscore'], axis=1)
+    return data_api_df.drop(['combine_col', 'wscore'], axis=1)
 
 
 def out_data_api(return_full_cols_df=False, show_logs=True):
