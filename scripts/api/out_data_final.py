@@ -9,7 +9,8 @@ API_FULL_COLS = [
     'carrier_id', 'carrier', 'order_type', 'order_type_id', 'sys_order_type_id',
     'weight', 'service_fee', 'delivery_type',
     'carrier_status', 'carrier_status_comment',
-    'estimate_delivery_time_details', 'estimate_delivery_time', 'delivery_success_rate', 'delivery_success_rate_id',
+    'estimate_delivery_time_details', 'estimate_delivery_time',
+    'delivery_success_rate', 'delivery_success_rate_id',
     'customer_best_carrier_id', 'customer_best_carrier',
     'partner_best_carrier_id', 'partner_best_carrier', 'score', 'stars',
     'cheapest_carrier_id', 'fastest_carrier_id', 'highest_score_carrier_id',
@@ -180,7 +181,8 @@ def combine_info_from_api(input_df, show_logs=False):
                 'estimate_delivery_time_details', 'estimate_delivery_time',
                 'customer_best_carrier', 'customer_best_carrier_id',
                 'fastest_carrier_id', 'highest_score_carrier_id',
-                'delivery_success_rate', 'score', 'stars', 'total_order',
+                'delivery_success_rate_id', 'delivery_success_rate',
+                'score', 'stars', 'total_order',
             ]], on=['receiver_province_id', 'receiver_district_id', 'carrier_id', 'order_type_id'], how='left'
         )
     )
@@ -332,14 +334,14 @@ def partner_best_carrier_old(data_api_df, threshold=15):
 def partner_best_carrier(data_api_df):
     data_api_df['wscore'] = data_api_df['cheapest_carrier_id'] * 1.4 + data_api_df['delivery_success_rate_id'] * 1.2 + \
                             data_api_df['highest_score_carrier_id']
-    partner_best_carrier = (
+    partner_best_carrier_df = (
         data_api_df.sort_values([
             'receiver_province_id', 'receiver_district_id', 'order_type_id', 'wscore'
         ]).drop_duplicates(['receiver_province_id', 'receiver_district_id', 'order_type_id'])
         [['receiver_province_id', 'receiver_district_id', 'order_type_id', 'carrier']]
-            .rename(columns={'carrier': 'customer_best_carrier'})
+            .rename(columns={'carrier': 'partner_best_carrier'})
     )
-    data_api_df = data_api_df.merge(partner_best_carrier,
+    data_api_df = data_api_df.merge(partner_best_carrier_df,
                                     on=['receiver_province_id', 'receiver_district_id', 'order_type_id'], how='inner')
     data_api_df['partner_best_carrier_id'] = data_api_df['partner_best_carrier'].map(MAPPING_CARRIER_ID)
 
