@@ -54,14 +54,14 @@ def customer_best_carrier(data_api_df):
             method="dense", ascending=False).astype(int)
     data_api_df['wscore'] = data_api_df['fastest_carrier_id'] * 1.4 + data_api_df['delivery_success_rate_id'] * 1.2 + \
                             data_api_df['highest_score_carrier_id']
-    customer_best_carrier = (
+    customer_best_carrier_df = (
         data_api_df.sort_values([
             'receiver_province_id', 'receiver_district_id', 'order_type_id', 'wscore'
         ]).drop_duplicates(['receiver_province_id', 'receiver_district_id', 'order_type_id'])
         [['receiver_province_id', 'receiver_district_id', 'order_type_id', 'carrier']]
             .rename(columns={'carrier': 'customer_best_carrier'})
     )
-    data_api_df = data_api_df.merge(customer_best_carrier,
+    data_api_df = data_api_df.merge(customer_best_carrier_df,
                                     on=['receiver_province_id', 'receiver_district_id', 'order_type_id'], how='inner')
     data_api_df['customer_best_carrier_id'] = data_api_df['customer_best_carrier'].map(MAPPING_CARRIER_ID)
 
@@ -255,8 +255,8 @@ def out_data_api(return_full_cols_df=False, show_logs=True):
             'estimate_delivery_time_details', 'estimate_delivery_time',
             'customer_best_carrier', 'customer_best_carrier_id',
             'fastest_carrier_id', 'highest_score_carrier_id',
-            'total_order', 'delivery_success_rate',
-            'delivery_success_rate_id', 'score', 'stars',
+            'total_order', 'delivery_success_rate_id',
+            'delivery_success_rate', 'score', 'stars',
         ]]
         return api_data_final
     else:
@@ -265,8 +265,8 @@ def out_data_api(return_full_cols_df=False, show_logs=True):
             'carrier_id', 'order_type_id', 'carrier_status', 'carrier_status_comment',
             'estimate_delivery_time_details', 'estimate_delivery_time',
             'fastest_carrier_id', 'highest_score_carrier_id',
-            'customer_best_carrier_id', 'total_order', 'delivery_success_rate',
-            'delivery_success_rate_id', 'score', 'stars',
+            'customer_best_carrier_id', 'total_order', 'delivery_success_rate_id',
+            'delivery_success_rate', 'score', 'stars',
         ]]
         if show_logs:
             print('9. Lưu dữ liệu API')
