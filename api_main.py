@@ -9,7 +9,7 @@ from scripts.api.out_data_final import *
 
 app = FastAPI(
     title="API SUPERSHIP", description="This is an API get calculation result from history transaction of SUPERSHIP",
-    docs_url="/doc"
+    docs_url="/api"
 )
 
 db = session()
@@ -62,17 +62,16 @@ class RowCalc(BaseModel):
         orm_mode = True
 
 
-@app.get("/api/result/batch/{number}", response_model=List[RowAPI], status_code=status.HTTP_200_OK)
-def get_all_rows(number: int):
-    rows = db.query(models.RowAPI).limit(number).all()
+@app.get("/v1/output/", response_model=List[RowAPI], status_code=status.HTTP_200_OK)
+def get_all_rows(batch: int = 100):
+    rows = db.query(models.RowAPI).limit(batch).all()
     if rows is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Resources Not Found")
     return rows
 
 
-@app.get("/api/result/province/{province_id}", response_model=List[RowAPI],
-         status_code=status.HTTP_200_OK)
-def get_rows_by_province_id(province_id: str):
+@app.get("/v1/output/province/", response_model=List[RowAPI], status_code=status.HTTP_200_OK)
+def get_rows_by_province_id(province_id: str = '01'):
     rows = (
         db.query(models.RowAPI)
             .filter(models.RowAPI.receiver_province_id == province_id).all()
@@ -82,9 +81,7 @@ def get_rows_by_province_id(province_id: str):
     return rows
 
 
-@app.get(
-    "/api/calculation/{order_id}{weight}{delivery_type_id}{sender_province_id}{sender_district_id}{receiver_province_id}{receiver_district_id}",
-    response_model=RowCalc, status_code=200)
+@app.get("/v1/calculation/", response_model=List[RowCalc], status_code=200)
 def calculate(
         order_id: str, weight: int, delivery_type_id: int,
         sender_province_id: str, sender_district_id: str,
@@ -95,14 +92,6 @@ def calculate(
         delivery_type = 'Gửi Bưu Cục'
     elif delivery_type_id == 1:
         delivery_type = 'Lấy Tận Nơi'
-
-    order_id = 'TIWUUWJONYKD412711618'
-    weight = 27600
-    delivery_type = 'Lấy Tận Nơi'
-    sender_province_id = '80'
-    sender_district_id = '795'
-    receiver_province_id = '89'
-    receiver_district_id = '893'
 
     df_input = pd.DataFrame(data={
         'order_id': [order_id],
@@ -122,7 +111,7 @@ def calculate(
         'cheapest_carrier_id', 'fastest_carrier_id', 'highest_score_carrier_id',
         'score', 'stars',
     ]]
-    print(df_output)
+    # print(df_output)
     final_list = []
     for i in range(len(df_output)):
         result_dict = {
@@ -145,6 +134,6 @@ def calculate(
             'stars': df_output.loc[i, :]['stars'],
         }
 
-        print(result_dict)
+        final_list.append(RowCalc(**result_dict))
 
-    return RowCalc(**result_dict)
+    return final_list
