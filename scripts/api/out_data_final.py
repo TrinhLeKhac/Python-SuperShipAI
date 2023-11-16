@@ -410,7 +410,6 @@ def out_data_final(input_df=None, carriers=ACTIVE_CARRIER, show_logs=False):
         print('vi. Lưu data tính toán...')
         final_df = final_df[API_FULL_COLS]
         final_df.to_parquet('./output/data_check_output.parquet')
-        # final_df.to_excel('./output/data_check_output.xlsx')
     else:
         final_df = final_df[API_COLS]
     print('-' * 100)
