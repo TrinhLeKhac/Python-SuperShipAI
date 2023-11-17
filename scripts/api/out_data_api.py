@@ -162,7 +162,7 @@ def out_data_api(return_full_cols_df=False, show_logs=True):
         print('4. Xủ lý score')
     score_df_list = []
 
-    for target_df in [danh_gia_zns, ti_le_giao_hang, chat_luong_noi_bo, thoi_gian_giao_hang, kho_giao_nhan]:
+    for target_df in [ngung_giao_nhan, danh_gia_zns, ti_le_giao_hang, chat_luong_noi_bo, thoi_gian_giao_hang, kho_giao_nhan]:
         target_df['weight_score'] = target_df['score'] * target_df['criteria_weight']
         score_df_list.append(target_df[['receiver_province', 'receiver_district', 'carrier', 'weight_score']])
 
