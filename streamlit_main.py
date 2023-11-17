@@ -223,11 +223,11 @@ if os.path.exists('./output/data_api.parquet'):
                             "partner_best_carrier_id": "ID NVC tốt nhất cho Đối tác",
                             "cheapest_carrier_id": "Ranking NVC (tiêu chí Rẻ nhất)",
                             "fastest_carrier_id": "Ranking NVC (tiêu chí Nhanh nhất)",
-                            "highest_score_carrier_id": "Ranking NVC (Tiêu chí Hiệu quả nhất)",
+                            "highest_score_carrier_id": "Ranking NVC (Tiêu chí Chất lượng nhất)",
                             "score": "Score đánh giá",
                             "stars": st.column_config.NumberColumn(
                                 "Phân loại",
-                                format="%d ⭐",
+                                format="%.1f ⭐",
                             ),
                         },
                         hide_index=True,

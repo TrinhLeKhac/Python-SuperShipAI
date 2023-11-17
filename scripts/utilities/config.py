@@ -1,13 +1,13 @@
 TRONG_SO = {
     'Ngưng giao nhận': {
-        'Tiêu chí': 10,
+        'Tiêu chí': 15,
         'Phân loại': {
             'Bình thường': 1,
             'Quá tải': -10,
         },
     },
     'Đánh giá ZNS': {
-        'Tiêu chí': 3,
+        'Tiêu chí': 4,
         'Phân loại': {
             'Loại': -10,
             '1 sao & Nhân viên không nhiệt tình': -8,
@@ -19,7 +19,7 @@ TRONG_SO = {
         },
     },
     'Tỉ lệ giao hàng': {
-        'Tiêu chí': 10,
+        'Tiêu chí': 8,
         'Phân loại': {
             'Tổng đơn hàng từ 30 đơn trở lên và có tỷ lệ giao hàng thành công trên 95%': 10,
             'Tổng đơn hàng từ 20 đơn trở lên và có tỷ lệ giao hàng thành công trên 95%': 9,
@@ -40,7 +40,7 @@ TRONG_SO = {
         },
     },
     'Chất lượng nội bộ': {
-        'Tiêu chí': 2,
+        'Tiêu chí': 3,
         'Phân loại': {
             'Ninja Van': {
                 'Ti lệ trên 95% và tổng số đơn giao hàng trên 100 đơn': 10,
@@ -54,7 +54,7 @@ TRONG_SO = {
         }
     },
     'Thời gian giao hàng': {
-        'Tiêu chí': 10,
+        'Tiêu chí': 12,
         'Phân loại': {
             'Cách Miền': {
                 # 96h
@@ -189,13 +189,13 @@ TRONG_SO = {
                 # trễ
                 'Trung bình dưới 96h và tổng số đơn giao hàng lớn hơn 3 đơn': -4,
                 'Trung bình dưới 96h và tổng số đơn giao hàng bé hơn hoặc bằng 3 đơn': -2,
-                'Trung bình thời gian giao hàng lớn hơn hoặc bằng 96h': -10, 
+                'Trung bình thời gian giao hàng lớn hơn hoặc bằng 96h': -10,
                 'Không có thông tin': 5,
             },
         }
     },
     'Có kho giao nhận': {
-        'Tiêu chí': 3,
+        'Tiêu chí': 4,
         'Phân loại': {
             'Có từ 3 bưu cục cùng cấp quận/huyện trở lên': 10,
             'Có 2 bưu cục cùng cấp quận/huyện trở lên': 9,
