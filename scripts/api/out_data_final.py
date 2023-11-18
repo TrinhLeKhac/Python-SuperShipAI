@@ -427,13 +427,13 @@ def out_data_final(input_df=None, carriers=ACTIVE_CARRIER, show_logs=False):
 
     print('iii. Tính phí dịch vụ')
     if input_df is None:
-        tmp_df3 = calculate_service_fee_v2(tmp_df2)
+        tmp_df3 = calculate_service_fee_v3(tmp_df2)
     else:
         tmp_df3 = calculate_service_fee(tmp_df2)
     assert len(tmp_df3) == len(tmp_df2), 'Transform data sai'
 
     print('iv. Tính ranking nhà vận chuyển theo tiêu chí rẻ nhất')
-    tmp_df4 = calculate_service_fee_v3(tmp_df3)
+    tmp_df4 = calculate_notification_v2(tmp_df3)
     assert len(tmp_df4) == len(tmp_df3), 'Transform data sai'
 
     print('v. Tính nhà vận chuyển tốt nhất cho đối tác')
