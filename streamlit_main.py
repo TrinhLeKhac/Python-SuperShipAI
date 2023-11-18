@@ -5,7 +5,7 @@ from scripts.api.out_data_final import *
 
 st.title("Tối ưu vận chuyển (SuperShipAI)")
 
-tab1, tab2, tab3 = st.tabs(["Manual", "Auto", "Output"])
+tab1, tab2, tab3 = st.tabs(["Manual", "Customer", "Partner"])
 with tab1:
     option = st.selectbox(
         "Lấy thông tin cần thiết cho quá trình tính toán bằng cách nào",
@@ -100,7 +100,7 @@ with tab1:
             st.info('Đã có kết quả API')
 
 if os.path.exists('./output/data_api.parquet'):
-    with tab3:
+    with tab2:
         toggle2 = st.toggle('Thông tin')
         if toggle2:
             st.markdown(
@@ -197,14 +197,17 @@ if os.path.exists('./output/data_api.parquet'):
                     method="dense", ascending=False)
                 df_st_output["highest_score_carrier_id"] = df_st_output["highest_score_carrier_id"].astype(int)
 
+                customer_best_carrier_id = df_st_output['customer_best_carrier_id'].values[0]
+
                 df_st_output = df_st_output[[
                     'order_id', 'carrier_id', 'order_type_id', 'sys_order_type_id',
                     'service_fee', 'carrier_status', 'carrier_status_comment',
                     'estimate_delivery_time_details', 'estimate_delivery_time', 'delivery_success_rate',
-                    'customer_best_carrier_id', 'partner_best_carrier_id',
+                    # 'customer_best_carrier_id', 'partner_best_carrier_id',
                     'cheapest_carrier_id', 'fastest_carrier_id', 'highest_score_carrier_id',
                     'score', 'stars',
                 ]]
+
                 if len(df_st_output) > 0:
                     st.dataframe(
                         df_st_output,
@@ -219,8 +222,8 @@ if os.path.exists('./output/data_api.parquet'):
                             "estimate_delivery_time_details": "Thời gian giao dự kiến (dạng thập phân)",
                             "estimate_delivery_time": "Thời gian giao dự kiến",
                             "delivery_success_rate": 'Tỉ lệ giao thành công',
-                            "customer_best_carrier_id": "ID NVC tốt nhất cho Khách hàng",
-                            "partner_best_carrier_id": "ID NVC tốt nhất cho Đối tác",
+                            # "customer_best_carrier_id": "ID NVC tốt nhất cho Khách hàng",
+                            # "partner_best_carrier_id": "ID NVC tốt nhất cho Đối tác",
                             "cheapest_carrier_id": "Ranking NVC (tiêu chí Rẻ nhất)",
                             "fastest_carrier_id": "Ranking NVC (tiêu chí Nhanh nhất)",
                             "highest_score_carrier_id": "Ranking NVC (Tiêu chí Chất lượng nhất)",
@@ -234,3 +237,5 @@ if os.path.exists('./output/data_api.parquet'):
                     )
                 else:
                     st.error('Tập dữ liệu quá khứ (dùng để tính toán) chưa có thông tin ', icon="🚨")
+
+                st.info('Nhà vận chuyển tốt nhất: ' + MAPPING_ID_CARRIER[customer_best_carrier_id])
