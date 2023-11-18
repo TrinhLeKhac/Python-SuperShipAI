@@ -414,6 +414,8 @@ def out_data_final(input_df=None, carriers=ACTIVE_CARRIER, show_logs=False):
     if input_df is None:
         print('vi. Lưu data tính toán...')
         final_df = final_df[API_FULL_COLS]
+        if not os.path.exists(ROOT_PATH + '/output'):
+            os.makedirs(ROOT_PATH + '/output')
         final_df.to_parquet(ROOT_PATH + '/output/data_check_output.parquet')
     else:
         final_df = final_df[API_COLS]

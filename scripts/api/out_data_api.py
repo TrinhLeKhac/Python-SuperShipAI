@@ -1,3 +1,4 @@
+import os
 import sys
 from pathlib import Path
 ROOT_PATH = str(Path(__file__).parent.parent.parent)
@@ -275,6 +276,8 @@ def out_data_api(return_full_cols_df=False, show_logs=True):
         ]]
         if show_logs:
             print('9. Lưu dữ liệu API')
+        if not os.path.exists(ROOT_PATH + '/output'):
+            os.makedirs(ROOT_PATH + '/output')
         with open(ROOT_PATH + '/output/data_api.json', 'w', encoding='utf-8') as file:
             api_data_final.to_json(file, force_ascii=False)
 

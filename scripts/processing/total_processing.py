@@ -1,4 +1,4 @@
-import sys
+import sys, os
 from pathlib import Path
 ROOT_PATH = str(Path(__file__).parent.parent.parent)
 sys.path.append(ROOT_PATH)
@@ -13,6 +13,10 @@ from scripts.processing.giao_dich import xu_ly_giao_dich, xu_ly_giao_dich_co_kho
 
 
 def total_processing():
+
+    if not os.path.exists(ROOT_PATH + '/processed_data'):
+        os.makedirs(ROOT_PATH + '/processed_data')
+
     print('1. Xử lý data bảng giá cước...')
     xu_ly_bang_gia_cuoc()
     print('>>> Done\n')
