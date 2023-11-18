@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+
 ROOT_PATH = str(Path(__file__).parent.parent.parent)
 sys.path.append(ROOT_PATH)
 
@@ -194,15 +195,16 @@ def combine_info_from_api(input_df, show_logs=False):
     return result_df
 
 
-def calculate_service_fee(input_df):
+def calculate_service_fee(input_df, cuoc_phi_df=None):
     """
     Note:
         service_fee tính theo cách join với bảng cước phí,
         sau đó filter lại giá trị trong ngưỡng
         bị Lỗi ArrayMemoryError khi chạy local (không đủ memory để chạy)
     """
-    cuoc_phi_df = pd.read_parquet(ROOT_PATH + '/processed_data/cuoc_phi.parquet')
-    cuoc_phi_df = cuoc_phi_df[['carrier', 'order_type', 'gt', 'lt_or_eq', 'service_fee']]
+    if cuoc_phi_df is None:
+        cuoc_phi_df = pd.read_parquet(ROOT_PATH + '/processed_data/cuoc_phi.parquet')
+        cuoc_phi_df = cuoc_phi_df[['carrier', 'order_type', 'gt', 'lt_or_eq', 'service_fee']]
 
     input_df.loc[input_df['weight'] > 50000, 'weight'] = 50000
     result_df = input_df.merge(cuoc_phi_df, on=['carrier', 'order_type'], how='inner')
@@ -262,6 +264,33 @@ def calculate_service_fee_v2(input_df):
         result_df['delivery_type'].isin(['Lấy Tận Nơi']),
         'service_fee'
     ] = result_df['service_fee'] + 1000
+
+    return result_df
+
+
+def calculate_service_fee_v3(input_df):
+    target_df = input_df.copy()
+    target_df.loc[target_df['weight'] > 50000, 'weight'] = 50000
+
+    cuoc_phi_df = pd.read_parquet(ROOT_PATH + '/processed_data/cuoc_phi.parquet')
+    cuoc_phi_df = cuoc_phi_df[['carrier', 'order_type', 'gt', 'lt_or_eq', 'service_fee']]
+
+    cuoc_phi_df1 = cuoc_phi_df.loc[(cuoc_phi_df['lt_or_eq'] <= 1000)]
+    cuoc_phi_df2 = cuoc_phi_df.loc[(cuoc_phi_df['gt'] >= 1000) & (cuoc_phi_df['lt_or_eq'] <= 5000)]
+    cuoc_phi_df3 = cuoc_phi_df.loc[(cuoc_phi_df['gt'] >= 5000) & (cuoc_phi_df['lt_or_eq'] <= 10000)]
+    cuoc_phi_df4 = cuoc_phi_df.loc[(cuoc_phi_df['gt'] >= 10000) & (cuoc_phi_df['lt_or_eq'] <= 50000)]
+
+    target_df1 = target_df.loc[(target_df['weight'] <= 1000)]
+    target_df2 = target_df.loc[(target_df['weight'] > 1000) & (target_df['weight'] <= 5000)]
+    target_df3 = target_df.loc[(target_df['weight'] > 5000) & (target_df['weight'] <= 10000)]
+    target_df4 = target_df.loc[(target_df['weight'] > 10000) & (target_df['weight'] <= 50000)]
+
+    result_df1 = calculate_service_fee(target_df1, cuoc_phi_df1)
+    result_df2 = calculate_service_fee(target_df2, cuoc_phi_df2)
+    result_df3 = calculate_service_fee(target_df3, cuoc_phi_df3)
+    result_df4 = calculate_service_fee(target_df4, cuoc_phi_df4)
+
+    result_df = pd.concat([result_df1, result_df2, result_df3, result_df4], ignore_index=True)
 
     return result_df
 
@@ -404,7 +433,7 @@ def out_data_final(input_df=None, carriers=ACTIVE_CARRIER, show_logs=False):
     assert len(tmp_df3) == len(tmp_df2), 'Transform data sai'
 
     print('iv. Tính ranking nhà vận chuyển theo tiêu chí rẻ nhất')
-    tmp_df4 = calculate_notification_v2(tmp_df3)
+    tmp_df4 = calculate_service_fee_v3(tmp_df3)
     assert len(tmp_df4) == len(tmp_df3), 'Transform data sai'
 
     print('v. Tính nhà vận chuyển tốt nhất cho đối tác')
