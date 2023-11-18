@@ -1,7 +1,11 @@
-from sqlalchemy import create_engine
+import sys
+from pathlib import Path
+ROOT_PATH = str(Path(__file__).parent.parent.parent)
+sys.path.append(ROOT_PATH)
+
 from scripts.api.out_data_final import *
 from scripts.database.schemas import *
-from datetime import datetime
+from sqlalchemy import create_engine
 
 
 def ingest_data_to_db():
