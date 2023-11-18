@@ -1,3 +1,6 @@
+from pathlib import Path
+ROOT_PATH = str(Path(__file__).parent.parent.parent)
+
 TRONG_SO = {
     'Ngưng giao nhận': {
         'Tiêu chí': 15,

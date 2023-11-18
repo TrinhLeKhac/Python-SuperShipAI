@@ -4,7 +4,7 @@ from scripts.utilities.config import *
 
 def transform_data_danh_gia_zns():
     # Đọc thông tin data ZNS
-    danh_gia_zns = pd.read_parquet('./processed_data/danh_gia_zns.parquet')
+    danh_gia_zns = pd.read_parquet(ROOT_PATH + '/processed_data/danh_gia_zns.parquet')
 
     # Xử lý data
     danh_gia_zns['comment'] = danh_gia_zns['comment'].fillna('Đánh giá khác')

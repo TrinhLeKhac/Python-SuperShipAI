@@ -11,13 +11,13 @@ def ingest_data_to_db():
     print('>>> Ingest data đã qua xử lý...')
     for f, schema in TABLE_SCHEMA.items():
         if f not in ['data_api', 'data_api_full', 'data_check_output']:
-            tmp_df = pd.read_parquet('./processed_data/{}.parquet'.format(f))
+            tmp_df = pd.read_parquet(ROOT_PATH + '/processed_data/{}.parquet'.format(f))
             tmp_df['import_date'] = datetime.now().strftime('%F')
             tmp_df.to_sql(name=f, con=engine, schema="db_schema", if_exists="replace", index=False, dtype=schema)
     print('-' * 100)
 
     print('>>> Ingest output API')
-    data_api_df = pd.read_parquet('./output/data_api.parquet')
+    data_api_df = pd.read_parquet(ROOT_PATH + '/output/data_api.parquet')
     data_api_df = data_api_df.reset_index().rename(columns={"index": "id"})
     data_api_df['import_date'] = datetime.now().strftime('%F')
     data_api_df.to_sql(name='data_api', con=engine, schema="db_schema", if_exists="replace", index=False,
@@ -33,8 +33,8 @@ def ingest_data_to_db():
     print('-' * 100)
 
     print('>>> Ingest data check output')
-    if os.path.exists('./output/data_check_output.parquet'):
-        check_df = pd.read_parquet('./output/data_check_output.parquet')
+    if os.path.exists(ROOT_PATH + '/output/data_check_output.parquet'):
+        check_df = pd.read_parquet(ROOT_PATH + '/output/data_check_output.parquet')
     else:
         print('>>>>>> Out data check output')
         check_df = out_data_final(show_logs=False)

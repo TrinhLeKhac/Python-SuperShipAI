@@ -50,10 +50,10 @@ def transform_buu_cuc(buu_cuc_df, carrier='BEST Express'):
 def transform_data_kho_giao_nhan():
 
     # Đọc thông tin bưu cục
-    buu_cuc_njv = pd.read_parquet('./processed_data/buu_cuc_ninja_van.parquet')
-    buu_cuc_ghn = pd.read_parquet('./processed_data/buu_cuc_ghn.parquet')
-    buu_cuc_best = pd.read_parquet('./processed_data/buu_cuc_best.parquet')
-    buu_cuc_ghtk = pd.read_parquet('./processed_data/buu_cuc_ghtk.parquet')
+    buu_cuc_njv = pd.read_parquet(ROOT_PATH + '/processed_data/buu_cuc_ninja_van.parquet')
+    buu_cuc_ghn = pd.read_parquet(ROOT_PATH + '/processed_data/buu_cuc_ghn.parquet')
+    buu_cuc_best = pd.read_parquet(ROOT_PATH + '/processed_data/buu_cuc_best.parquet')
+    buu_cuc_ghtk = pd.read_parquet(ROOT_PATH + '/processed_data/buu_cuc_ghtk.parquet')
 
     buu_cuc_njv = transform_buu_cuc(buu_cuc_njv, carrier='Ninja Van')
     buu_cuc_ghn = transform_buu_cuc(buu_cuc_ghn, carrier='GHN')

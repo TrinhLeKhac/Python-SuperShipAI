@@ -147,7 +147,7 @@ def generate_order_type(input_df, carriers=ACTIVE_CARRIER):
             }), on=['receiver_province_id', 'receiver_district_id'], how='left')
     )
 
-    phan_vung_nvc = pd.read_parquet('./processed_data/phan_vung_nvc.parquet')
+    phan_vung_nvc = pd.read_parquet(ROOT_PATH + '/processed_data/phan_vung_nvc.parquet')
     result_df = (
         result_df.merge(
             phan_vung_nvc.rename(columns={
@@ -196,7 +196,7 @@ def calculate_service_fee(input_df):
         sau đó filter lại giá trị trong ngưỡng
         bị Lỗi ArrayMemoryError khi chạy local (không đủ memory để chạy)
     """
-    cuoc_phi_df = pd.read_parquet('./processed_data/cuoc_phi.parquet')
+    cuoc_phi_df = pd.read_parquet(ROOT_PATH + '/processed_data/cuoc_phi.parquet')
     cuoc_phi_df = cuoc_phi_df[['carrier', 'order_type', 'gt', 'lt_or_eq', 'service_fee']]
 
     input_df.loc[input_df['weight'] > 50000, 'weight'] = 50000
@@ -234,7 +234,7 @@ def get_cuoc_phi(cuoc_phi_df, carrier, order_type, weight):
 
 
 def calculate_service_fee_v2(input_df):
-    cuoc_phi_df = pd.read_parquet('./processed_data/cuoc_phi.parquet')
+    cuoc_phi_df = pd.read_parquet(ROOT_PATH + '/processed_data/cuoc_phi.parquet')
     cuoc_phi_df = cuoc_phi_df[['carrier', 'order_type', 'gt', 'lt_or_eq', 'service_fee']]
 
     input_df.loc[input_df['weight'] > 50000, 'weight'] = 50000
@@ -350,7 +350,7 @@ def partner_best_carrier(data_api_df):
 
 def out_data_final(input_df=None, carriers=ACTIVE_CARRIER, show_logs=False):
     if input_df is None:
-        giao_dich_valid = pd.read_parquet('./processed_data/giao_dich_combine_valid.parquet')
+        giao_dich_valid = pd.read_parquet(ROOT_PATH + '/processed_data/giao_dich_combine_valid.parquet')
         giao_dich_valid = giao_dich_valid[[
             'order_id', 'weight', 'delivery_type', 'sender_province', 'sender_district',
             'receiver_province', 'receiver_district'
@@ -409,7 +409,7 @@ def out_data_final(input_df=None, carriers=ACTIVE_CARRIER, show_logs=False):
     if input_df is None:
         print('vi. Lưu data tính toán...')
         final_df = final_df[API_FULL_COLS]
-        final_df.to_parquet('./output/data_check_output.parquet')
+        final_df.to_parquet(ROOT_PATH + '/output/data_check_output.parquet')
     else:
         final_df = final_df[API_COLS]
     print('-' * 100)

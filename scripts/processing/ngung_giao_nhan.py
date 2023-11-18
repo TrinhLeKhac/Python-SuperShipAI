@@ -3,7 +3,7 @@ from scripts.utilities.helper import *
 
 def xu_ly_ngung_giao_nhan():
     # Đọc data ngưng giao nhận
-    ngung_giao_nhan_df = pd.read_excel('./input/Ngưng Giao Nhận.xlsx')
+    ngung_giao_nhan_df = pd.read_excel(ROOT_PATH + '/input/Ngưng Giao Nhận.xlsx')
 
     # Chọn lấy cột cần thiết và đổi tên cột
     ngung_giao_nhan_df.columns = [
@@ -37,4 +37,4 @@ def xu_ly_ngung_giao_nhan():
     assert set_carrier - set_norm_full_carrier == set(), 'Ops, Tên nhà vận chuyển chưa được chuẩn hóa'
 
     # Lưu thông tin
-    ngung_giao_nhan_final_df.to_parquet('./processed_data/ngung_giao_nhan.parquet', index=False)
+    ngung_giao_nhan_final_df.to_parquet(ROOT_PATH + '/processed_data/ngung_giao_nhan.parquet', index=False)

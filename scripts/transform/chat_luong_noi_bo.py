@@ -21,7 +21,7 @@ def status_chat_luong_noi_bo_ninja_van(series, col1='delivery_success_rate', col
 
 def transform_data_chat_luong_noi_bo():
 
-    chat_luong_noi_bo_df = pd.read_parquet('./processed_data/chat_luong_noi_bo_njv.parquet')
+    chat_luong_noi_bo_df = pd.read_parquet(ROOT_PATH + '/processed_data/chat_luong_noi_bo_njv.parquet')
 
     chat_luong_noi_bo_df['status'] = chat_luong_noi_bo_df.apply(status_chat_luong_noi_bo_ninja_van, axis=1)
     chat_luong_noi_bo_df['score'] = (

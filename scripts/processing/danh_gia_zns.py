@@ -3,7 +3,7 @@ from scripts.utilities.helper import *
 
 def xu_ly_danh_gia_zns():
     # 1. Đọc dữ liệu
-    danh_gia_zns_df = pd.read_excel('./input/Đánh Giá ZNS.xlsx')
+    danh_gia_zns_df = pd.read_excel(ROOT_PATH + '/input/Đánh Giá ZNS.xlsx')
     danh_gia_zns_df = danh_gia_zns_df[[
         'Tỉnh/Thành Phố Giao Hàng',
         'Quận/Huyện Giao Hàng',
@@ -34,4 +34,4 @@ def xu_ly_danh_gia_zns():
     assert set_carrier - set_norm_full_carrier == set(), 'Ops, Tên nhà vận chuyển chưa được chuẩn hóa'
 
     # 4. Lưu thông tin
-    danh_gia_zns_df.to_parquet('./processed_data/danh_gia_zns.parquet', index=False)
+    danh_gia_zns_df.to_parquet(ROOT_PATH + '/processed_data/danh_gia_zns.parquet', index=False)

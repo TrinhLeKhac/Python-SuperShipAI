@@ -5,7 +5,7 @@ from scripts.utilities.config import *
 def transform_data_ngung_giao_nhan():
 
     # Đọc data ngưng giao nhận
-    ngung_giao_nhan_df = pd.read_parquet('./processed_data/ngung_giao_nhan.parquet')
+    ngung_giao_nhan_df = pd.read_parquet(ROOT_PATH + '/processed_data/ngung_giao_nhan.parquet')
 
     # Chọn lấy cột cần thiết và đổi tên cột
     ngung_giao_nhan_df['status'] = ngung_giao_nhan_df['status'].fillna('Bình thường')

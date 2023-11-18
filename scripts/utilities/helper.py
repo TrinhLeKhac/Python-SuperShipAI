@@ -58,10 +58,10 @@ def get_data_province_mapping_district():
             .sort_values(['province_id', 'district_id'])
             .reset_index(drop=True)
     )
-    province_district_df.to_parquet('./processed_data/province_mapping_district.parquet', index=False)
+    province_district_df.to_parquet(ROOT_PATH + '/processed_data/province_mapping_district.parquet', index=False)
 
 
-PROVINCE_MAPPING_DISTRICT_DF = pd.read_parquet('./processed_data/province_mapping_district.parquet')
+PROVINCE_MAPPING_DISTRICT_DF = pd.read_parquet(ROOT_PATH + '/processed_data/province_mapping_district.parquet')
 
 active_carrier_df = pd.DataFrame(data={'carrier': ACTIVE_CARRIER})
 PROVINCE_MAPPING_DISTRICT_CROSS_CARRIER_DF = (
@@ -71,7 +71,7 @@ PROVINCE_MAPPING_DISTRICT_CROSS_CARRIER_DF = (
     }).merge(active_carrier_df, how='cross')
 )
 
-with open('./processed_data/province_mapping_district_from_api.json') as file:
+with open(ROOT_PATH + '/processed_data/province_mapping_district_from_api.json') as file:
     PROVINCE_MAPPING_DISTRICT = json.load(file)
 
 
@@ -162,7 +162,7 @@ def transform_dict(g):
 
 
 def calculate_monetary(id_nvc, khoi_luong, loai_van_chuyen):
-    cuoc_phi_nvc = pd.read_parquet('./processed_data/cuoc_phi_nvc.parquet')
+    cuoc_phi_nvc = pd.read_parquet(ROOT_PATH + '/processed_data/cuoc_phi_nvc.parquet')
     cuoc_phi_nvc = (
         pd.melt(
             cuoc_phi_nvc,

@@ -2,9 +2,7 @@ from fastapi import FastAPI, status, HTTPException
 from pydantic import BaseModel
 from scripts.database.database import session
 from scripts.database import models
-from typing import List, Optional, Annotated
-import pandas as pd
-from datetime import datetime
+from typing import List
 from scripts.api.out_data_final import *
 
 app = FastAPI(

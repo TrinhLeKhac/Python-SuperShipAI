@@ -95,7 +95,7 @@ def type_of_system_delivery(s):
 
 def xu_ly_giao_dich():
     print('Xử lý giao dịch BEST Express...')
-    best_df = pd.read_excel('./input/Giao Dịch Nhà Vận Chuyển.xlsx', sheet_name='BEST')
+    best_df = pd.read_excel(ROOT_PATH + '/input/Giao Dịch Nhà Vận Chuyển.xlsx', sheet_name='BEST')
     best_df = best_df[OLD_DATA_COLS]
     best_df.columns = NEW_DATA_COLS
     best_df['carrier'] = 'BEST Express'
@@ -109,7 +109,7 @@ def xu_ly_giao_dich():
     best_df['carrier_created_at'] = best_df['carrier_created_at'].apply(lambda x: str(x)).apply(convert_datetime_type2)
 
     print('Xử lý giao dịch Ninja Van...')
-    njv_df = pd.read_excel('./input/Giao Dịch Nhà Vận Chuyển.xlsx', sheet_name='NJV')
+    njv_df = pd.read_excel(ROOT_PATH + '/input/Giao Dịch Nhà Vận Chuyển.xlsx', sheet_name='NJV')
     njv_df = njv_df[OLD_DATA_COLS]
     njv_df.columns = NEW_DATA_COLS
     njv_df['carrier'] = 'Ninja Van'
@@ -123,7 +123,7 @@ def xu_ly_giao_dich():
     njv_df['finished_at'] = njv_df['finished_at'].apply(lambda x: str(x)).apply(convert_datetime_type1)
 
     print('Xử lý giao dịch GHN...')
-    ghn_df = pd.read_excel('./input/Giao Dịch Nhà Vận Chuyển.xlsx', sheet_name='GHN')
+    ghn_df = pd.read_excel(ROOT_PATH + '/input/Giao Dịch Nhà Vận Chuyển.xlsx', sheet_name='GHN')
     ghn_df = ghn_df[OLD_DATA_COLS]
     ghn_df.columns = NEW_DATA_COLS
     ghn_df['carrier'] = 'GHN'
@@ -137,7 +137,7 @@ def xu_ly_giao_dich():
     ghn_df['finished_at'] = ghn_df['finished_at'].apply(lambda x: str(x)).apply(convert_datetime_type1)
 
     print('Xử lý giao dịch Viettel Post...')
-    vtp_df = pd.read_excel('./input/Giao Dịch Nhà Vận Chuyển.xlsx', sheet_name='VTP')
+    vtp_df = pd.read_excel(ROOT_PATH + '/input/Giao Dịch Nhà Vận Chuyển.xlsx', sheet_name='VTP')
     vtp_df = vtp_df[OLD_DATA_COLS]
     vtp_df.columns = NEW_DATA_COLS
     vtp_df['carrier'] = 'Viettel Post'
@@ -151,7 +151,7 @@ def xu_ly_giao_dich():
     vtp_df['finished_at'] = vtp_df['finished_at'].apply(lambda x: str(x)).apply(convert_datetime_type1)
 
     print('Xử lý giao dịch SPX Express...')
-    spx_df = pd.read_excel('./input/Giao Dịch Nhà Vận Chuyển.xlsx', sheet_name='SPX')
+    spx_df = pd.read_excel(ROOT_PATH + '/input/Giao Dịch Nhà Vận Chuyển.xlsx', sheet_name='SPX')
     spx_df = spx_df[OLD_DATA_COLS]
     spx_df.columns = NEW_DATA_COLS
     spx_df['carrier'] = 'SPX Express'
@@ -165,7 +165,7 @@ def xu_ly_giao_dich():
     spx_df['finished_at'] = spx_df['finished_at'].apply(lambda x: str(x)).apply(convert_datetime_type1)
 
     print('Xử lý giao dịch GHTK...')
-    ghtk_df = pd.read_excel('./input/Giao Dịch Nhà Vận Chuyển.xlsx', sheet_name='GHTK')
+    ghtk_df = pd.read_excel(ROOT_PATH + '/input/Giao Dịch Nhà Vận Chuyển.xlsx', sheet_name='GHTK')
     ghtk_df = ghtk_df[OLD_DATA_COLS]
     ghtk_df.columns = NEW_DATA_COLS
     ghtk_df['carrier'] = 'GHTK'
@@ -182,23 +182,23 @@ def xu_ly_giao_dich():
     giao_dich_df = pd.concat([best_df, njv_df, ghn_df, vtp_df, spx_df, ghtk_df], ignore_index=True)
 
     print('Lưu thông tin...')
-    giao_dich_df.to_parquet('./processed_data/giao_dich_tong.parquet', index=False)
+    giao_dich_df.to_parquet(ROOT_PATH + '/processed_data/giao_dich_tong.parquet', index=False)
 
 
 def xu_ly_giao_dich_co_khoi_luong():
-    giao_dich_co_khoi_luong_df = pd.read_excel('./input/Đơn Có Khối Lượng.xlsx', sheet_name='Combined')
+    giao_dich_co_khoi_luong_df = pd.read_excel(ROOT_PATH + '/input/Đơn Có Khối Lượng.xlsx', sheet_name='Combined')
 
     giao_dich_co_khoi_luong_df = giao_dich_co_khoi_luong_df[['Mã Đơn SuperShip', 'Khối Lượng', 'Kho Hàng']]
     giao_dich_co_khoi_luong_df.columns = ['order_id', 'weight', 'storage_address']
 
     print('Lưu thông tin...')
-    giao_dich_co_khoi_luong_df.to_parquet('./processed_data/giao_dich_co_khoi_luong.parquet', index=False)
+    giao_dich_co_khoi_luong_df.to_parquet(ROOT_PATH + '/processed_data/giao_dich_co_khoi_luong.parquet', index=False)
 
 
 def tong_hop_thong_tin_giao_dich():
     print('Đọc thông tin giao dịch và giao dịch có khối lượng...')
-    giao_dich_tong_df = pd.read_parquet('./processed_data/giao_dich_tong.parquet')
-    giao_dich_co_khoi_luong_df = pd.read_parquet('./processed_data/giao_dich_co_khoi_luong.parquet')
+    giao_dich_tong_df = pd.read_parquet(ROOT_PATH + '/processed_data/giao_dich_tong.parquet')
+    giao_dich_co_khoi_luong_df = pd.read_parquet(ROOT_PATH + '/processed_data/giao_dich_co_khoi_luong.parquet')
 
     print('Combine thông tin giao dịch')
     giao_dich_valid_df = giao_dich_tong_df.merge(giao_dich_co_khoi_luong_df, on='order_id', how='inner')
@@ -225,7 +225,7 @@ def tong_hop_thong_tin_giao_dich():
     print('Số giao dịch sau khi chuẩn hóa tỉnh/thành, quận/huyện: ', len(giao_dich_valid))
 
     print('Tính toán loại vận chuyển từ địa chỉ giao và nhận...')
-    phan_vung_nvc = pd.read_parquet('./processed_data/phan_vung_nvc.parquet')
+    phan_vung_nvc = pd.read_parquet(ROOT_PATH + '/processed_data/phan_vung_nvc.parquet')
     giao_dich_valid = (
         giao_dich_valid.merge(
             phan_vung_nvc.rename(columns={
@@ -257,4 +257,4 @@ def tong_hop_thong_tin_giao_dich():
     assert set_carrier - set_norm_full_carrier == set(), 'Ops, Tên nhà vận chuyển chưa được chuẩn hóa'
 
     print('Lưu thông tin...')
-    giao_dich_valid.to_parquet('./processed_data/giao_dich_combine_valid.parquet', index=False)
+    giao_dich_valid.to_parquet(ROOT_PATH + '/processed_data/giao_dich_combine_valid.parquet', index=False)

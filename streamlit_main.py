@@ -1,6 +1,5 @@
 from scripts.utilities.streamlit_helper import *
 from scripts.processing.total_processing import total_processing
-from scripts.api.out_data_api import *
 from scripts.api.out_data_final import *
 
 st.title("Tối ưu vận chuyển (SuperShipAI)")
@@ -99,7 +98,7 @@ with tab1:
         if out_data_api_button and st.session_state['api_button_state']:
             st.info('Đã có kết quả API')
 
-if os.path.exists('./output/data_api.parquet'):
+if os.path.exists(ROOT_PATH + '/output/data_api.parquet'):
     with tab2:
         toggle2 = st.toggle('Thông tin')
         if toggle2:

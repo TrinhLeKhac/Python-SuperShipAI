@@ -240,7 +240,7 @@ def out_data_api(return_full_cols_df=False, show_logs=True):
 
     if show_logs:
         print('9. Thông tin số sao đánh giá của khách hàng')
-    zns_df = pd.read_parquet('./processed_data/danh_gia_zns.parquet')
+    zns_df = pd.read_parquet(ROOT_PATH + '/processed_data/danh_gia_zns.parquet')
     zns_df = zns_df.groupby(['receiver_province', 'receiver_district', 'carrier']).agg(
         stars=('n_stars', 'mean')).reset_index()
     zns_df['stars'] = np.round(zns_df['stars'], 1)
@@ -270,10 +270,10 @@ def out_data_api(return_full_cols_df=False, show_logs=True):
         ]]
         if show_logs:
             print('9. Lưu dữ liệu API')
-        with open('./output/data_api.json', 'w', encoding='utf-8') as file:
+        with open(ROOT_PATH + '/output/data_api.json', 'w', encoding='utf-8') as file:
             api_data_final.to_json(file, force_ascii=False)
 
-        api_data_final.to_parquet('./output/data_api.parquet', index=False)
+        api_data_final.to_parquet(ROOT_PATH + '/output/data_api.parquet', index=False)
     if show_logs:
         print('>>> Done\n')
 

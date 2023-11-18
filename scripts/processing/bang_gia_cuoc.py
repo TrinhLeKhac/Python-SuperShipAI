@@ -10,7 +10,7 @@ COLUMNS_CUOC_PHI = [
 
 def xu_ly_bang_gia_cuoc():
     # 1. Lấy thông tin bảng giá cước
-    bang_gia_cuoc_df = pd.read_excel('./input/Bảng Cước Phí.xlsx')
+    bang_gia_cuoc_df = pd.read_excel(ROOT_PATH + '/input/Bảng Cước Phí.xlsx')
 
     # 2.1 Tách lấy thông tin bảng giá cước Ninja Van và xử lý
     ninja_van_df = pd.concat([bang_gia_cuoc_df.iloc[1:21, :2], bang_gia_cuoc_df.iloc[1:21, 2:9]], axis=1).reset_index(
@@ -103,4 +103,4 @@ def xu_ly_bang_gia_cuoc():
     assert set_carrier - set_norm_full_carrier == set(), 'Ops, Tên nhà vận chuyển chưa được chuẩn hóa'
 
     # 4. Lưu thông tin đã xử lý
-    cuoc_phi_df.to_parquet('./processed_data/cuoc_phi.parquet', index=False)
+    cuoc_phi_df.to_parquet(ROOT_PATH + '/processed_data/cuoc_phi.parquet', index=False)

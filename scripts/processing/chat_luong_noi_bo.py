@@ -15,7 +15,7 @@ def get_pct_ninja_van(s):
 def xu_ly_chat_luong_noi_bo():
 
     # 1. Đọc data raw
-    clnb_njv_df = pd.read_excel('./input/Chất Lượng Nội Bộ NJV.xlsx')
+    clnb_njv_df = pd.read_excel(ROOT_PATH + '/input/Chất Lượng Nội Bộ NJV.xlsx')
     clnb_njv_df = clnb_njv_df[1:]
     clnb_njv_df.columns = [
         'region', 'receiver_province', 'id_receiver_district', 'receiver_district',
@@ -35,4 +35,4 @@ def xu_ly_chat_luong_noi_bo():
     clnb_njv_df = clnb_njv_df.loc[clnb_njv_df['receiver_province'].notna() & clnb_njv_df['receiver_district'].notna()]
 
     # 5. Lưu thông tin
-    clnb_njv_df.to_parquet('./processed_data/chat_luong_noi_bo_njv.parquet', index=False)
+    clnb_njv_df.to_parquet(ROOT_PATH + '/processed_data/chat_luong_noi_bo_njv.parquet', index=False)

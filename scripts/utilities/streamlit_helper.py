@@ -1,16 +1,14 @@
-import streamlit as st
-import os
-import pandas as pd
+from scripts.utilities.helper import *
 
 
 @st.cache_data
 def st_get_data_api_final():
-    return pd.read_parquet('./output/data_check_output_backup.parquet')
+    return pd.read_parquet(ROOT_PATH + '/output/data_check_output_backup.parquet')
 
 
 @st.cache_data
 def st_get_province_mapping_district():
-    return pd.read_parquet('./processed_data/province_mapping_district.parquet')
+    return pd.read_parquet(ROOT_PATH + '/processed_data/province_mapping_district.parquet')
 
 
 # function support streamlit render

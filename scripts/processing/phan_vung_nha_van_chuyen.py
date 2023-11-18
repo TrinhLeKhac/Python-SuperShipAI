@@ -4,7 +4,7 @@ from scripts.utilities.helper import *
 def xu_ly_phan_vung_nha_van_chuyen():
 
     # 1. Đọc thông tin raw
-    phan_vung_nvc = pd.read_excel('./input/Phân Vùng Ghép SuperShip.xlsx')
+    phan_vung_nvc = pd.read_excel(ROOT_PATH + '/input/Phân Vùng Ghép SuperShip.xlsx')
 
     phan_vung_nvc = phan_vung_nvc.iloc[3:, 2:17]
     phan_vung_nvc.columns = [
@@ -85,4 +85,4 @@ def xu_ly_phan_vung_nha_van_chuyen():
     assert set_carrier - set_norm_full_carrier == set(), 'Ops, Tên nhà vận chuyển chưa được chuẩn hóa'
 
     # 5. Lưu thông tin
-    phan_vung_nvc_final.to_parquet('./processed_data/phan_vung_nvc.parquet', index=False)
+    phan_vung_nvc_final.to_parquet(ROOT_PATH + '/processed_data/phan_vung_nvc.parquet', index=False)

@@ -56,7 +56,7 @@ def score_ti_le_giao_hang(tong_don, ti_le_thanh_cong):
 def transform_data_ti_le_giao_hang():
 
     # 1. Đọc thông tin giao dịch valid
-    giao_dich_valid = pd.read_parquet('./processed_data/giao_dich_combine_valid.parquet')
+    giao_dich_valid = pd.read_parquet(ROOT_PATH + '/processed_data/giao_dich_combine_valid.parquet')
 
     # 2. Transform data hoàn hàng
     hoan_hang = giao_dich_valid[giao_dich_valid['order_status'].isin([
