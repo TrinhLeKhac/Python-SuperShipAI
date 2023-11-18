@@ -1,3 +1,8 @@
+import sys
+from pathlib import Path
+ROOT_PATH = str(Path(__file__).parent.parent.parent)
+sys.path.append(ROOT_PATH)
+
 from scripts.transform.chat_luong_noi_bo import transform_data_chat_luong_noi_bo
 from scripts.transform.danh_gia_zns import transform_data_danh_gia_zns
 from scripts.transform.kho_giao_nhan import transform_data_kho_giao_nhan

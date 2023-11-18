@@ -1,3 +1,8 @@
+import sys
+from pathlib import Path
+ROOT_PATH = str(Path(__file__).parent.parent.parent)
+sys.path.append(ROOT_PATH)
+
 from scripts.utilities.helper import *
 from scripts.utilities.config import *
 from scripts.transform.total_transform import total_transform
