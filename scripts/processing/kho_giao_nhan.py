@@ -16,7 +16,7 @@ def xu_ly_kho_giao_nhan():
 
     buu_cuc_njv_df.columns = [
         'region', 'receiver_province', 'id_receiver_district', 'receiver_district',
-        'short_name', 'njv_post_office', 'delivery_success_rate', 'don_den_tram'
+        'short_name', 'njv_post_office', 'rate', 'don_den_tram'
     ]
     buu_cuc_njv_df = buu_cuc_njv_df[['receiver_province', 'receiver_district', 'njv_post_office']]
     buu_cuc_njv_df['receiver_province'] = buu_cuc_njv_df['receiver_province'].astype(str)

@@ -127,7 +127,7 @@ if os.path.exists(ROOT_PATH + '/output/data_api.parquet'):
         # Show output API
         pro_dis_df = st_get_province_mapping_district()
         with st.container():
-            order_id = st.text_input('Nhập mã đơn hàng: ')
+            order_code = st.text_input('Nhập mã đơn hàng: ')
             sender_province, sender_district = st.columns(2)
             receiver_province, receiver_district = st.columns(2)
             with sender_province:
@@ -136,7 +136,7 @@ if os.path.exists(ROOT_PATH + '/output/data_api.parquet'):
                     options=(pro_dis_df['province'].unique().tolist()),
                     key='sender_province',
                 )
-                opt_sender_province_id = pro_dis_df.loc[pro_dis_df['province'] == opt_sender_province]['province_id'].values[0]
+                opt_sender_province_code = pro_dis_df.loc[pro_dis_df['province'] == opt_sender_province]['province_code'].values[0]
             with sender_district:
                 opt_sender_district = st.selectbox(
                     "Chọn quận huyện giao hàng",
@@ -146,14 +146,14 @@ if os.path.exists(ROOT_PATH + '/output/data_api.parquet'):
                         ['district'].unique()),
                     key='sender_district',
                 )
-                opt_sender_district_id = pro_dis_df.loc[pro_dis_df['district'] == opt_sender_district]['district_id'].values[0]
+                opt_sender_district_code = pro_dis_df.loc[pro_dis_df['district'] == opt_sender_district]['district_code'].values[0]
             with receiver_province:
                 opt_receiver_province = st.selectbox(
                     "Chọn tỉnh thành nhận hàng",
                     options=(pro_dis_df['province'].unique().tolist()),
                     key='receiver_province',
                 )
-                opt_receiver_province_id = pro_dis_df.loc[pro_dis_df['province'] == opt_receiver_province]['province_id'].values[0]
+                opt_receiver_province_code = pro_dis_df.loc[pro_dis_df['province'] == opt_receiver_province]['province_code'].values[0]
             with receiver_district:
                 opt_receiver_district = st.selectbox(
                     "Chọn quận huyện nhận hàng",
@@ -163,7 +163,7 @@ if os.path.exists(ROOT_PATH + '/output/data_api.parquet'):
                         ['district'].unique()),
                     key='receiver_district',
                 )
-                opt_receiver_district_id = pro_dis_df.loc[pro_dis_df['district'] == opt_receiver_district]['district_id'].values[0]
+                opt_receiver_district_code = pro_dis_df.loc[pro_dis_df['district'] == opt_receiver_district]['district_code'].values[0]
 
             carrier_id, delivery_type = st.columns(2)
             with carrier_id:
@@ -177,38 +177,38 @@ if os.path.exists(ROOT_PATH + '/output/data_api.parquet'):
                 opt_delivery_type = st.selectbox(
                     "Chọn loại vận chuyển",
                     options=('Nội Miền', 'Cận Miền', 'Cách Miền', 'Nội Thành Tỉnh', 'Ngoại Thành Tỉnh', 'Nội Thành Tp.HCM - HN', 'Ngoại Thành Tp.HCM - HN'),
-                    key='delivery_type'
+                    key='pickup_type'
                 )
             weight = st.number_input('Nhập khối lượng đơn (<= 50,000g): ', key='weight')
 
-            if order_id != '' and (weight > 0):
+            if order_code != '' and (weight > 0):
                 df_input = pd.DataFrame(data={
-                    'order_id': [order_id],
+                    'order_code': [order_code],
                     'weight': [weight],
-                    'delivery_type': [opt_delivery_type],
-                    'sender_province_id': [opt_sender_province_id],
-                    'sender_district_id': [opt_sender_district_id],
-                    'receiver_province_id': [opt_receiver_province_id],
-                    'receiver_district_id': [opt_receiver_district_id],
+                    'pickup_type': [opt_delivery_type],
+                    'sender_province_code': [opt_sender_province_code],
+                    'sender_district_code': [opt_sender_district_code],
+                    'receiver_province_code': [opt_receiver_province_code],
+                    'receiver_district_code': [opt_receiver_district_code],
                 })
 
                 df_st_output = out_data_final(df_input, carriers=opt_carriers, show_logs=False)
-                df_st_output["fastest_carrier_id"] = df_st_output["estimate_delivery_time_details"].rank(
+                df_st_output['speed_ranking'] = df_st_output['time_data'].rank(
                     method="dense", ascending=True)
-                df_st_output["fastest_carrier_id"] = df_st_output["fastest_carrier_id"].astype(int)
+                df_st_output['speed_ranking'] = df_st_output['speed_ranking'].astype(int)
 
-                df_st_output["highest_score_carrier_id"] = df_st_output["score"].rank(
+                df_st_output['score_ranking'] = df_st_output["score"].rank(
                     method="dense", ascending=False)
-                df_st_output["highest_score_carrier_id"] = df_st_output["highest_score_carrier_id"].astype(int)
+                df_st_output['score_ranking'] = df_st_output['score_ranking'].astype(int)
 
-                customer_best_carrier_id = df_st_output['customer_best_carrier_id'].values[0]
+                customer_best_carrier_id = df_st_output['for_fshop'].values[0]
 
                 df_st_output = df_st_output[[
-                    'order_id', 'carrier_id', 'order_type_id', 'sys_order_type_id',
-                    'service_fee', 'carrier_status', 'carrier_status_comment',
-                    'estimate_delivery_time_details', 'estimate_delivery_time', 'delivery_success_rate',
-                    # 'customer_best_carrier_id', 'partner_best_carrier_id',
-                    'cheapest_carrier_id', 'fastest_carrier_id', 'highest_score_carrier_id',
+                    'order_code', 'carrier_id', 'new_type', 'route_type',
+                    'price', 'status', 'description',
+                    'time_data', 'time_display', 'rate',
+                    # 'for_fshop', 'for_partner',
+                    'price_ranking', 'speed_ranking', 'score_ranking',
                     'score', 'stars',
                 ]]
 
@@ -216,21 +216,21 @@ if os.path.exists(ROOT_PATH + '/output/data_api.parquet'):
                     st.dataframe(
                         df_st_output,
                         column_config={
-                            "order_id": "Mã đơn hàng",
+                            'order_code': "Mã đơn hàng",
                             "carrier_id": "ID của Nhà vận chuyển",
-                            "order_type_id": "ID Loại vận chuyển",
-                            "sys_order_type_id": "ID Loại vận chuyển (Hệ thống)",
-                            "service_fee": "Tiền cước",
-                            "carrier_status": "Trạng thái nhà vận chuyển",
-                            "carrier_status_comment": "Trạng thái nhà vận chuyển (comment)",
-                            "estimate_delivery_time_details": "Thời gian giao dự kiến (dạng thập phân)",
-                            "estimate_delivery_time": "Thời gian giao dự kiến",
-                            "delivery_success_rate": 'Tỉ lệ giao thành công',
-                            # "customer_best_carrier_id": "ID NVC tốt nhất cho Khách hàng",
-                            # "partner_best_carrier_id": "ID NVC tốt nhất cho Đối tác",
-                            "cheapest_carrier_id": "Ranking NVC (tiêu chí Rẻ nhất)",
-                            "fastest_carrier_id": "Ranking NVC (tiêu chí Nhanh nhất)",
-                            "highest_score_carrier_id": "Ranking NVC (Tiêu chí Chất lượng nhất)",
+                            'new_type': "ID Loại vận chuyển",
+                            'route_type': "ID Loại vận chuyển (Hệ thống)",
+                            'price': "Tiền cước",
+                            'status': "Trạng thái nhà vận chuyển",
+                            'description': "Trạng thái nhà vận chuyển (comment)",
+                            'time_data': "Thời gian giao dự kiến (dạng thập phân)",
+                            'time_display': "Thời gian giao dự kiến",
+                            'rate': 'Tỉ lệ giao thành công',
+                            # 'for_shop': "ID NVC tốt nhất cho Khách hàng",
+                            # 'for_partner': "ID NVC tốt nhất cho Đối tác",
+                            'price_ranking': "Ranking NVC (tiêu chí Rẻ nhất)",
+                            'speed_ranking': "Ranking NVC (tiêu chí Nhanh nhất)",
+                            'score_ranking': "Ranking NVC (Tiêu chí Chất lượng nhất)",
                             "score": "Score đánh giá",
                             "stars": st.column_config.NumberColumn(
                                 "Phân loại",

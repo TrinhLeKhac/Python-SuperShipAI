@@ -2,7 +2,7 @@ from scripts.utilities.helper import *
 from scripts.utilities.config import *
 
 
-def status_chat_luong_noi_bo_ninja_van(series, col1='delivery_success_rate', col2='is_more_than_100'):
+def status_chat_luong_noi_bo_ninja_van(series, col1='rate', col2='is_more_than_100'):
     if series[col1] == 0:
         return 'Không có thông tin'
     elif (series[col1] >= 0.95) & series[col2]:

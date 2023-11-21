@@ -7,9 +7,9 @@ OLD_DATA_COLS = [
 ]
 
 NEW_DATA_COLS = [
-    'carrier_created_at', 'order_id', 'carrier', 'order_status',
+    'carrier_created_at', 'order_code', 'carrier', 'order_status',
     'receiver_province', 'receiver_district', 'n_deliveries',
-    'delivery_type', 'is_returned', 'finished_at',
+    'pickup_type', 'is_returned', 'finished_at',
 ]
 
 
@@ -189,7 +189,7 @@ def xu_ly_giao_dich_co_khoi_luong():
     giao_dich_co_khoi_luong_df = pd.read_excel(ROOT_PATH + '/input/Đơn Có Khối Lượng.xlsx', sheet_name='Combined')
 
     giao_dich_co_khoi_luong_df = giao_dich_co_khoi_luong_df[['Mã Đơn SuperShip', 'Khối Lượng', 'Kho Hàng']]
-    giao_dich_co_khoi_luong_df.columns = ['order_id', 'weight', 'storage_address']
+    giao_dich_co_khoi_luong_df.columns = ['order_code', 'weight', 'storage_address']
 
     print('Lưu thông tin...')
     giao_dich_co_khoi_luong_df.to_parquet(ROOT_PATH + '/processed_data/giao_dich_co_khoi_luong.parquet', index=False)
@@ -201,7 +201,7 @@ def tong_hop_thong_tin_giao_dich():
     giao_dich_co_khoi_luong_df = pd.read_parquet(ROOT_PATH + '/processed_data/giao_dich_co_khoi_luong.parquet')
 
     print('Combine thông tin giao dịch')
-    giao_dich_valid_df = giao_dich_tong_df.merge(giao_dich_co_khoi_luong_df, on='order_id', how='inner')
+    giao_dich_valid_df = giao_dich_tong_df.merge(giao_dich_co_khoi_luong_df, on='order_code', how='inner')
     print('Số giao dịch hợp lệ: ', len(giao_dich_valid_df))
 
     print('Tách địa chỉ tỉnh/thành, quận/huyện lấy hàng từ kho nhận')
@@ -240,15 +240,15 @@ def tong_hop_thong_tin_giao_dich():
             }), on=['carrier', 'receiver_province', 'receiver_district'], how='left')
     )
     giao_dich_valid['order_type'] = giao_dich_valid.apply(type_of_delivery, axis=1)
-    giao_dich_valid['order_type_id'] = giao_dich_valid['order_type'].map(MAPPING_ORDER_TYPE_ID)
-    giao_dich_valid['sys_order_type_id'] = giao_dich_valid.apply(type_of_system_delivery, axis=1)
+    giao_dich_valid['new_type'] = giao_dich_valid['order_type'].map(MAPPING_ORDER_TYPE_ID)
+    giao_dich_valid['route_type'] = giao_dich_valid.apply(type_of_system_delivery, axis=1)
 
     giao_dich_valid = giao_dich_valid[[
-        'carrier_created_at', 'order_id', 'carrier', 'weight',
+        'carrier_created_at', 'order_code', 'carrier', 'weight',
         'sender_province', 'sender_district',
         'receiver_province', 'receiver_district',
-        'order_status', 'order_type', 'order_type_id', 'sys_order_type_id',
-        'n_deliveries', 'delivery_type',
+        'order_status', 'order_type', 'new_type', 'route_type',
+        'n_deliveries', 'pickup_type',
         'is_returned', 'finished_at',
     ]]
 

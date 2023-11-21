@@ -19,16 +19,16 @@ def xu_ly_chat_luong_noi_bo():
     clnb_njv_df = clnb_njv_df[1:]
     clnb_njv_df.columns = [
         'region', 'receiver_province', 'id_receiver_district', 'receiver_district',
-        'short_receiver_district', 'njv_post_office', 'delivery_success_rate', 'is_more_than_100'
+        'short_receiver_district', 'njv_post_office', 'rate', 'is_more_than_100'
     ]
-    clnb_njv_df = clnb_njv_df[['receiver_province', 'receiver_district', 'njv_post_office', 'delivery_success_rate', 'is_more_than_100']]
+    clnb_njv_df = clnb_njv_df[['receiver_province', 'receiver_district', 'njv_post_office', 'rate', 'is_more_than_100']]
 
     # 2. Xử lý data
     clnb_njv_df.loc[clnb_njv_df['is_more_than_100'].isna(), 'is_more_than_100'] = False
     clnb_njv_df['is_more_than_100'] = clnb_njv_df['is_more_than_100'].astype(bool)
 
     # 3. Tách percentage
-    clnb_njv_df['delivery_success_rate'] = clnb_njv_df['delivery_success_rate'].astype(str).apply(get_pct_ninja_van)
+    clnb_njv_df['rate'] = clnb_njv_df['rate'].astype(str).apply(get_pct_ninja_van)
 
     # 4. Chuẩn hóa tên quận/huyện, tỉnh/thành
     clnb_njv_df = normalize_province_district(clnb_njv_df, tinh_thanh='receiver_province', quan_huyen='receiver_district')

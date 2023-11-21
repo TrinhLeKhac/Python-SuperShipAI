@@ -35,27 +35,27 @@ def get_data_province_mapping_district():
     response = requests.get('https://api.mysupership.vn/v1/partner/areas/province', verify=False).json()
 
     province_df = pd.DataFrame(data={
-        'province_id': [c['name'] for c in response['results']],
+        'province_code': [c['name'] for c in response['results']],
         'province': [c['code'] for c in response['results']]
     })
 
     list_df = []
-    for province_code in province_df['province_id'].tolist():
+    for province_code in province_df['province_code'].tolist():
         result = requests.get('https://api.mysupership.vn/v1/partner/areas/district?province={}'.format(province_code),
                               verify=False).json()['results']
         for c in result:
             tmp_df = pd.DataFrame(data={
-                'district_id': [c['code']],
+                'district_code': [c['code']],
                 'district': [c['name']],
-                'province_id': [province_code]
+                'province_code': [province_code]
             })
             list_df.append(tmp_df)
     district_df = pd.concat(list_df, ignore_index=True)
 
     province_district_df = (
         province_df.merge(
-            district_df, on='province_id', how='inner')
-            .sort_values(['province_id', 'district_id'])
+            district_df, on='province_code', how='inner')
+            .sort_values(['province_code', 'district_code'])
             .reset_index(drop=True)
     )
     province_district_df.to_parquet(ROOT_PATH + '/input/province_mapping_district.parquet', index=False)
@@ -202,7 +202,7 @@ def _calculate_output_api(df_api, ma_don_hang, tinh_thanh, quan_huyen, id_nvc, l
         ]
     if len(result) > 0:
         status = result['status'].values[0]  # lấy từ quá khứ
-        estimate_delivery_time = result['estimate_delivery_time'].values[0]  # lấy từ quá khứ
+        estimate_delivery_time = result['time_display'].values[0]  # lấy từ quá khứ
         score = result['score'].values[0]  # lấy từ quá khứ
         stars = result['stars'].values[0]  # lấy từ quá khứ
         monetary = calculate_monetary(id_nvc, khoi_luong, loai_van_chuyen)  # tính tiền từ khối lượng đơn hiện tại
@@ -213,7 +213,7 @@ def _calculate_output_api(df_api, ma_don_hang, tinh_thanh, quan_huyen, id_nvc, l
             'id_nvc': [id_nvc],
             'status': [status],
             'monetary': [monetary],
-            'estimate_delivery_time': [estimate_delivery_time],
+            'time_display': [estimate_delivery_time],
             'score': [score],
             'stars': [stars],
             # 'notification': [notification],
@@ -228,10 +228,10 @@ def _calculate_output_api(df_api, ma_don_hang, tinh_thanh, quan_huyen, id_nvc, l
             12: 'Tiki Now',
         })
         return_df = return_df[['ma_don_hang', 'id_nvc', 'nvc', 'status', 'monetary',
-                               'estimate_delivery_time', 'score', 'stars']]
+                               'time_display', 'score', 'stars']]
     else:
         return_df = pd.DataFrame(columns=['ma_don_hang', 'id_nvc', 'nvc', 'status', 'monetary',
-                                          'estimate_delivery_time', 'score', 'stars'])
+                                          'time_display', 'score', 'stars'])
     return return_df
 
 
@@ -256,11 +256,11 @@ def calculate_notification(data_df):
         return re_nhat_df
     else:
         nhanh_nhat_df = remain_df1.loc[
-            remain_df1['estimate_delivery_time'].str[0].astype(int) ==
-            remain_df1['estimate_delivery_time'].str[0].astype(int).min()
+            remain_df1['time_display'].str[0].astype(int) ==
+            remain_df1['time_display'].str[0].astype(int).min()
             ]
         nhanh_nhat_df['notification'] = 'Nhanh nhất'
-        remain_df2 = merge_left_only(remain_df1, nhanh_nhat_df, keys=['estimate_delivery_time'])
+        remain_df2 = merge_left_only(remain_df1, nhanh_nhat_df, keys=['time_display'])
         if len(remain_df2) == 0:
             return pd.concat([re_nhat_df, nhanh_nhat_df])
         else:

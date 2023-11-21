@@ -5,8 +5,8 @@ from sqlalchemy import String, Boolean, Integer, Column, Numeric, Date, TIMESTAM
 class RowAPI(Base):
     __tablename__ = "data_api"
     id = Column(Integer, primary_key=True)
-    receiver_province_id = Column(String, nullable=True)
-    receiver_district_id = Column(String, nullable=True)
+    receiver_province_code = Column(String, nullable=True)
+    receiver_district_code = Column(String, nullable=True)
     carrier_id = Column(Integer, nullable=False)
     order_type_id = Column(Integer, nullable=False)
     carrier_status = Column(Integer, default=False)

@@ -66,16 +66,16 @@ def transform_data_ti_le_giao_hang():
         'Hoàn hàng thành công',
         'Đã đối soát công nợ trả hàng',
         'Thành công - Chuyển trả người gửi'
-    ])].groupby(['receiver_province', 'receiver_district', 'carrier'])['order_id'].count().rename(
+    ])].groupby(['receiver_province', 'receiver_district', 'carrier'])['order_code'].count().rename(
         'total_failed_order').reset_index()
 
-    tong_don = giao_dich_valid.groupby(['receiver_province', 'receiver_district', 'carrier'])['order_id'].count().rename(
+    tong_don = giao_dich_valid.groupby(['receiver_province', 'receiver_district', 'carrier'])['order_code'].count().rename(
         'total_order').reset_index()
 
     ti_le_giao_hang = hoan_hang.merge(tong_don, on=['receiver_province', 'receiver_district', 'carrier'], how='right')
     ti_le_giao_hang['total_failed_order'] = ti_le_giao_hang['total_failed_order'].fillna(0).astype(int)
-    ti_le_giao_hang['delivery_success_rate'] = 1 - ti_le_giao_hang['total_failed_order'] / ti_le_giao_hang['total_order']
-    ti_le_giao_hang['modified_delivery_success_rate'] = ti_le_giao_hang['delivery_success_rate']
+    ti_le_giao_hang['rate'] = 1 - ti_le_giao_hang['total_failed_order'] / ti_le_giao_hang['total_order']
+    ti_le_giao_hang['modified_delivery_success_rate'] = ti_le_giao_hang['rate']
 
     # 3.1 Tiêu chí loại 1
     condition1 = (
@@ -126,7 +126,7 @@ def transform_data_ti_le_giao_hang():
     )
     ti_le_giao_hang['total_failed_order'] = ti_le_giao_hang['total_failed_order'].fillna(0).astype(int)
     ti_le_giao_hang['total_order'] = ti_le_giao_hang['total_order'].fillna(0).astype(int)
-    ti_le_giao_hang['delivery_success_rate'] = ti_le_giao_hang['delivery_success_rate'].fillna(0)
+    ti_le_giao_hang['rate'] = ti_le_giao_hang['rate'].fillna(0)
     ti_le_giao_hang['modified_delivery_success_rate'] = ti_le_giao_hang['modified_delivery_success_rate'].fillna(0)
     ti_le_giao_hang['status'] = ti_le_giao_hang['status'].fillna('Không có thông tin')
     ti_le_giao_hang['score'] = ti_le_giao_hang['status'].map(TRONG_SO['Tỉ lệ giao hàng']['Phân loại'])
@@ -135,7 +135,7 @@ def transform_data_ti_le_giao_hang():
 
     ti_le_giao_hang = ti_le_giao_hang[[
         'receiver_province', 'receiver_district', 'carrier',
-        'total_failed_order', 'total_order', 'delivery_success_rate',
+        'total_failed_order', 'total_order', 'rate',
         'status', 'score', 'criteria', 'criteria_weight'
     ]]
 

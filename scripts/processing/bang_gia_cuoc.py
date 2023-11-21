@@ -94,7 +94,7 @@ def xu_ly_bang_gia_cuoc():
             'Nội Thành Tp.HCM - HN', 'Ngoại Thành Tp.HCM - HN',
             'Nội Miền', 'Cận Miền', 'Cách Miền'
         ],
-        var_name='order_type', value_name='service_fee'
+        var_name='order_type', value_name='price'
     )
 
     # 3. Check tên nhà vận chuyển đã được chuẩn hóa chưa

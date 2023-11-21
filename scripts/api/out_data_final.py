@@ -9,24 +9,24 @@ from scripts.utilities.config import *
 from scripts.api.out_data_api import out_data_api
 
 API_FULL_COLS = [
-    'order_id',
-    'sender_province_id', 'sender_province', 'sender_district_id', 'sender_district',
-    'receiver_province_id', 'receiver_province', 'receiver_district_id', 'receiver_district',
-    'carrier_id', 'carrier', 'order_type', 'order_type_id', 'sys_order_type_id',
-    'weight', 'service_fee', 'delivery_type',
-    'carrier_status', 'carrier_status_comment',
-    'estimate_delivery_time_details', 'estimate_delivery_time',
-    'delivery_success_rate', 'delivery_success_rate_id',
-    'customer_best_carrier_id', 'customer_best_carrier',
-    'partner_best_carrier_id', 'partner_best_carrier', 'score', 'stars',
-    'cheapest_carrier_id', 'fastest_carrier_id', 'highest_score_carrier_id',
+    'order_code',
+    'sender_province_code', 'sender_province', 'sender_district_code', 'sender_district',
+    'receiver_province_code', 'receiver_province', 'receiver_district_code', 'receiver_district',
+    'carrier_id', 'carrier', 'order_type', 'new_type', 'route_type',
+    'weight', 'price', 'pickup_type',
+    'status', 'description',
+    'time_data', 'time_display',
+    'rate', 'delivery_success_ranking',
+    'for_fshop', 'shop_best_carrier',
+    'for_partner', 'partner_best_carrier', 'score', 'stars',
+    'price_ranking', 'speed_ranking', 'score_ranking',
 ]
 API_COLS = [
-    'order_id', 'carrier_id', 'order_type_id', 'sys_order_type_id', 'service_fee',
-    'carrier_status', 'carrier_status_comment',
-    'estimate_delivery_time_details', 'estimate_delivery_time', 'delivery_success_rate',
-    'customer_best_carrier_id', 'partner_best_carrier_id', 'score', 'stars',
-    'cheapest_carrier_id', 'fastest_carrier_id', 'highest_score_carrier_id',
+    'order_code', 'carrier_id', 'new_type', 'route_type', 'price',
+    'status', 'description',
+    'time_data', 'time_display', 'rate',
+    'for_fshop', 'for_partner', 'score', 'stars',
+    'price_ranking', 'speed_ranking', 'score_ranking',
 ]
 
 
@@ -97,38 +97,38 @@ def type_of_system_delivery(s):
 
 def generate_sample_input(n_rows=1000):
     result_df = pd.DataFrame()
-    result_df['order_id'] = [
+    result_df['order_code'] = [
         ''.join(np.random.choice(list('ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 12)) \
         + ''.join(np.random.choice(list('123456789'), 9))
         for i in range(n_rows)
     ]
-    result_df['sender_district_id'] = np.random.choice(PROVINCE_MAPPING_DISTRICT_DF['district_id'].tolist(), n_rows)
-    result_df['receiver_district_id'] = np.random.choice(PROVINCE_MAPPING_DISTRICT_DF['district_id'].tolist(), n_rows)
+    result_df['sender_district_code'] = np.random.choice(PROVINCE_MAPPING_DISTRICT_DF['district_code'].tolist(), n_rows)
+    result_df['receiver_district_code'] = np.random.choice(PROVINCE_MAPPING_DISTRICT_DF['district_code'].tolist(), n_rows)
     result_df = (
         result_df.merge(
-            PROVINCE_MAPPING_DISTRICT_DF[['province_id', 'district_id']].rename(columns={
-                'province_id': 'sender_province_id',
-                'district_id': 'sender_district_id'
-            }), on='sender_district_id', how='left')
+            PROVINCE_MAPPING_DISTRICT_DF[['province_code', 'district_code']].rename(columns={
+                'province_code': 'sender_province_code',
+                'district_code': 'sender_district_code'
+            }), on='sender_district_code', how='left')
             .merge(
-            PROVINCE_MAPPING_DISTRICT_DF[['province_id', 'district_id']].rename(columns={
-                'province_id': 'receiver_province_id',
-                'district_id': 'receiver_district_id'
-            }), on='receiver_district_id', how='left')
+            PROVINCE_MAPPING_DISTRICT_DF[['province_code', 'district_code']].rename(columns={
+                'province_code': 'receiver_province_code',
+                'district_code': 'receiver_district_code'
+            }), on='receiver_district_code', how='left')
     )
     result_df['weight'] = [
         np.random.choice(list(range(100, 50000, 100)))
         for i in range(n_rows)
     ]
 
-    result_df['delivery_type'] = [
+    result_df['pickup_type'] = [
         np.random.choice(['Lấy Tận Nơi', 'Gửi Bưu Cục'])
         for i in range(n_rows)
     ]
 
     return result_df[[
-        'order_id', 'weight', 'delivery_type',
-        'sender_province_id', 'sender_district_id', 'receiver_province_id', 'receiver_district_id',
+        'order_code', 'weight', 'pickup_type',
+        'sender_province_code', 'sender_district_code', 'receiver_province_code', 'receiver_district_code',
     ]]
 
 
@@ -139,18 +139,18 @@ def generate_order_type(input_df, carriers=ACTIVE_CARRIER):
         result_df
             .merge(
             PROVINCE_MAPPING_DISTRICT_DF.rename(columns={
-                'province_id': 'sender_province_id',
-                'district_id': 'sender_district_id',
+                'province_code': 'sender_province_code',
+                'district_code': 'sender_district_code',
                 'province': 'sender_province',
                 'district': 'sender_district'
-            }), on=['sender_province_id', 'sender_district_id'], how='left')
+            }), on=['sender_province_code', 'sender_district_code'], how='left')
             .merge(
             PROVINCE_MAPPING_DISTRICT_DF.rename(columns={
-                'province_id': 'receiver_province_id',
-                'district_id': 'receiver_district_id',
+                'province_code': 'receiver_province_code',
+                'district_code': 'receiver_district_code',
                 'province': 'receiver_province',
                 'district': 'receiver_district'
-            }), on=['receiver_province_id', 'receiver_district_id'], how='left')
+            }), on=['receiver_province_code', 'receiver_district_code'], how='left')
     )
 
     phan_vung_nvc = pd.read_parquet(ROOT_PATH + '/processed_data/phan_vung_nvc.parquet')
@@ -168,8 +168,8 @@ def generate_order_type(input_df, carriers=ACTIVE_CARRIER):
             }), on=['carrier', 'receiver_province', 'receiver_district'], how='left')
     )
     result_df['order_type'] = result_df.apply(type_of_delivery, axis=1)
-    result_df['order_type_id'] = result_df['order_type'].map(MAPPING_ORDER_TYPE_ID)
-    result_df['sys_order_type_id'] = result_df.apply(type_of_system_delivery, axis=1)
+    result_df['new_type'] = result_df['order_type'].map(MAPPING_ORDER_TYPE_ID)
+    result_df['route_type'] = result_df.apply(type_of_system_delivery, axis=1)
 
     return result_df.drop([
         'sender_outer_region', 'sender_inner_region',
@@ -182,14 +182,14 @@ def combine_info_from_api(input_df, show_logs=False):
     result_df = (
         input_df.merge(
             api_data_final[[
-                'receiver_province_id', 'receiver_district_id', 'carrier_id', 'order_type_id',
-                'carrier_status', 'carrier_status_comment',
-                'estimate_delivery_time_details', 'estimate_delivery_time',
-                'customer_best_carrier', 'customer_best_carrier_id',
-                'fastest_carrier_id', 'highest_score_carrier_id',
-                'delivery_success_rate_id', 'delivery_success_rate',
+                'receiver_province_code', 'receiver_district_code', 'carrier_id', 'new_type',
+                'status', 'description',
+                'time_data', 'time_display',
+                'shop_best_carrier', 'for_fshop',
+                'speed_ranking', 'score_ranking',
+                'delivery_success_ranking', 'rate',
                 'score', 'stars', 'total_order',
-            ]], on=['receiver_province_id', 'receiver_district_id', 'carrier_id', 'order_type_id'], how='left'
+            ]], on=['receiver_province_code', 'receiver_district_code', 'carrier_id', 'new_type'], how='left'
         )
     )
     return result_df
@@ -204,7 +204,7 @@ def calculate_service_fee(input_df, cuoc_phi_df=None):
     """
     if cuoc_phi_df is None:
         cuoc_phi_df = pd.read_parquet(ROOT_PATH + '/processed_data/cuoc_phi.parquet')
-        cuoc_phi_df = cuoc_phi_df[['carrier', 'order_type', 'gt', 'lt_or_eq', 'service_fee']]
+        cuoc_phi_df = cuoc_phi_df[['carrier', 'order_type', 'gt', 'lt_or_eq', 'price']]
 
     input_df.loc[input_df['weight'] > 50000, 'weight'] = 50000
     result_df = input_df.merge(cuoc_phi_df, on=['carrier', 'order_type'], how='inner')
@@ -216,16 +216,16 @@ def calculate_service_fee(input_df, cuoc_phi_df=None):
     # Ninja Van lấy tận nơi cộng cước phí 1,500
     result_df.loc[
         result_df['carrier'].isin(['Ninja Van']) &
-        result_df['delivery_type'].isin(['Lấy Tận Nơi']),
-        'service_fee'
-    ] = result_df['service_fee'] + 1500
+        result_df['pickup_type'].isin(['Lấy Tận Nơi']),
+        'price'
+    ] = result_df['price'] + 1500
 
     # GHN lấy tận nơi cộng cước phí 1,000
     result_df.loc[
         result_df['carrier'].isin(['GHN']) &
-        result_df['delivery_type'].isin(['Lấy Tận Nơi']),
-        'service_fee'
-    ] = result_df['service_fee'] + 1000
+        result_df['pickup_type'].isin(['Lấy Tận Nơi']),
+        'price'
+    ] = result_df['price'] + 1000
 
     return result_df.drop(['gt', 'lt_or_eq'], axis=1)
 
@@ -236,17 +236,17 @@ def get_cuoc_phi(cuoc_phi_df, carrier, order_type, weight):
         & (cuoc_phi_df['order_type'] == order_type)
         & (cuoc_phi_df['gt'] < weight)
         & (cuoc_phi_df['lt_or_eq'] >= weight)
-        ]['service_fee'].values[0]
+        ]['price'].values[0]
     return service_fee
 
 
 def calculate_service_fee_v2(input_df):
     cuoc_phi_df = pd.read_parquet(ROOT_PATH + '/processed_data/cuoc_phi.parquet')
-    cuoc_phi_df = cuoc_phi_df[['carrier', 'order_type', 'gt', 'lt_or_eq', 'service_fee']]
+    cuoc_phi_df = cuoc_phi_df[['carrier', 'order_type', 'gt', 'lt_or_eq', 'price']]
 
     input_df.loc[input_df['weight'] > 50000, 'weight'] = 50000
     result_df = input_df.copy()
-    result_df['service_fee'] = result_df.apply(
+    result_df['price'] = result_df.apply(
         lambda s: get_cuoc_phi(cuoc_phi_df, s['carrier'], s['order_type'], s['weight']),
         axis=1
     )
@@ -254,16 +254,16 @@ def calculate_service_fee_v2(input_df):
     # Ninja Van lấy tận nơi cộng cước phí 1,500
     result_df.loc[
         result_df['carrier'].isin(['Ninja Van']) &
-        result_df['delivery_type'].isin(['Lấy Tận Nơi']),
-        'service_fee'
-    ] = result_df['service_fee'] + 1500
+        result_df['pickup_type'].isin(['Lấy Tận Nơi']),
+        'price'
+    ] = result_df['price'] + 1500
 
     # GHN lấy tận nơi cộng cước phí 1,000
     result_df.loc[
         result_df['carrier'].isin(['GHN']) &
-        result_df['delivery_type'].isin(['Lấy Tận Nơi']),
-        'service_fee'
-    ] = result_df['service_fee'] + 1000
+        result_df['pickup_type'].isin(['Lấy Tận Nơi']),
+        'price'
+    ] = result_df['price'] + 1000
 
     return result_df
 
@@ -273,7 +273,7 @@ def calculate_service_fee_v3(input_df):
     target_df.loc[target_df['weight'] > 50000, 'weight'] = 50000
 
     cuoc_phi_df = pd.read_parquet(ROOT_PATH + '/processed_data/cuoc_phi.parquet')
-    cuoc_phi_df = cuoc_phi_df[['carrier', 'order_type', 'gt', 'lt_or_eq', 'service_fee']]
+    cuoc_phi_df = cuoc_phi_df[['carrier', 'order_type', 'gt', 'lt_or_eq', 'price']]
 
     cuoc_phi_df1 = cuoc_phi_df.loc[(cuoc_phi_df['lt_or_eq'] <= 1000)]
     cuoc_phi_df2 = cuoc_phi_df.loc[(cuoc_phi_df['gt'] >= 1000) & (cuoc_phi_df['lt_or_eq'] <= 5000)]
@@ -296,27 +296,27 @@ def calculate_service_fee_v3(input_df):
 
 
 def calculate_notification(input_df):
-    re_nhat_df = input_df.groupby(['order_id'])['service_fee'].min().reset_index()
+    re_nhat_df = input_df.groupby(['order_code'])['price'].min().reset_index()
     re_nhat_df['notification'] = 'Rẻ nhất'
 
     # Gắn ngược lại để lấy đủ row (trong trường hợp có nhiều carrier cùng mức giá
-    re_nhat_df = re_nhat_df.merge(input_df, on=['order_id', 'service_fee'], how='inner')
+    re_nhat_df = re_nhat_df.merge(input_df, on=['order_code', 'price'], how='inner')
 
-    remain_df1 = merge_left_only(input_df, re_nhat_df, keys=['order_id', 'service_fee'])
+    remain_df1 = merge_left_only(input_df, re_nhat_df, keys=['order_code', 'price'])
 
-    nhanh_nhat_df = remain_df1.groupby(['order_id'])['estimate_delivery_time_details'].min().reset_index()
+    nhanh_nhat_df = remain_df1.groupby(['order_code'])['time_data'].min().reset_index()
     nhanh_nhat_df['notification'] = 'Nhanh nhất'
-    nhanh_nhat_df = nhanh_nhat_df.merge(remain_df1, on=['order_id', 'estimate_delivery_time_details'],
+    nhanh_nhat_df = nhanh_nhat_df.merge(remain_df1, on=['order_code', 'time_data'],
                                         how='inner')
 
     remain_df2 = merge_left_only(remain_df1, nhanh_nhat_df,
-                                 keys=['order_id', 'estimate_delivery_time_details'])
+                                 keys=['order_code', 'time_data'])
 
-    hieu_qua_nhat_df = remain_df2.groupby(['order_id'])['score'].max().reset_index()
+    hieu_qua_nhat_df = remain_df2.groupby(['order_code'])['score'].max().reset_index()
     hieu_qua_nhat_df['notification'] = 'Dịch vụ tốt'
-    hieu_qua_nhat_df = hieu_qua_nhat_df.merge(remain_df2, on=['order_id', 'score'], how='inner')
+    hieu_qua_nhat_df = hieu_qua_nhat_df.merge(remain_df2, on=['order_code', 'score'], how='inner')
 
-    remain_df3 = merge_left_only(remain_df2, hieu_qua_nhat_df, keys=['order_id', 'score'])
+    remain_df3 = merge_left_only(remain_df2, hieu_qua_nhat_df, keys=['order_code', 'score'])
     remain_df3['notification'] = 'Bình thường'
 
     result_df = pd.concat([
@@ -331,8 +331,8 @@ def calculate_notification(input_df):
 
 def calculate_notification_v2(input_df):
     result_df = input_df.copy()
-    result_df["cheapest_carrier_id"] = result_df.groupby("order_id")["service_fee"].rank(method="dense", ascending=True)
-    result_df["cheapest_carrier_id"] = result_df["cheapest_carrier_id"].astype(int)
+    result_df['price_ranking'] = result_df.groupby('order_code')['price'].rank(method="dense", ascending=True)
+    result_df['price_ranking'] = result_df['price_ranking'].astype(int)
 
     return result_df
 
@@ -343,13 +343,13 @@ def partner_best_carrier_old(data_api_df, threshold=15):
     df3 = data_api_df.loc[data_api_df['total_order'] == 0]
 
     group1 = (
-        df1.sort_values(['service_fee', 'delivery_success_rate'], ascending=[True, False])
+        df1.sort_values(['price', 'rate'], ascending=[True, False])
             .drop_duplicates(['receiver_province', 'receiver_district', 'order_type'], keep='first')
         [['receiver_province', 'receiver_district', 'order_type', 'carrier']]
             .rename(columns={'carrier': 'partner_best_carrier'})
     )
     group2 = (
-        df2.sort_values(['delivery_success_rate', 'service_fee'], ascending=[False, True])
+        df2.sort_values(['rate', 'price'], ascending=[False, True])
             .drop_duplicates(['receiver_province', 'receiver_district', 'order_type'], keep='first')
         [['receiver_province', 'receiver_district', 'order_type', 'carrier']]
             .rename(columns={'carrier': 'partner_best_carrier'})
@@ -359,25 +359,25 @@ def partner_best_carrier_old(data_api_df, threshold=15):
 
     partner_best_carrier_df = pd.concat([group1, group2, group3]).drop_duplicates(
         ['receiver_province', 'receiver_district', 'order_type'], keep='first')
-    partner_best_carrier_df['partner_best_carrier_id'] = partner_best_carrier_df['partner_best_carrier'].map(
+    partner_best_carrier_df['for_partner'] = partner_best_carrier_df['partner_best_carrier'].map(
         MAPPING_CARRIER_ID)
 
     return partner_best_carrier_df
 
 
 def partner_best_carrier(data_api_df):
-    data_api_df['wscore'] = data_api_df['cheapest_carrier_id'] * 1.4 + data_api_df['delivery_success_rate_id'] * 1.2 + \
-                            data_api_df['highest_score_carrier_id']
+    data_api_df['wscore'] = data_api_df['price_ranking'] * 1.4 + data_api_df['delivery_success_ranking'] * 1.2 + \
+                            data_api_df['score_ranking']
     partner_best_carrier_df = (
         data_api_df.sort_values([
-            'receiver_province_id', 'receiver_district_id', 'order_type_id', 'wscore'
-        ]).drop_duplicates(['receiver_province_id', 'receiver_district_id', 'order_type_id'])
-        [['receiver_province_id', 'receiver_district_id', 'order_type_id', 'carrier']]
+            'receiver_province_code', 'receiver_district_code', 'new_type', 'wscore'
+        ]).drop_duplicates(['receiver_province_code', 'receiver_district_code', 'new_type'])
+        [['receiver_province_code', 'receiver_district_code', 'new_type', 'carrier']]
             .rename(columns={'carrier': 'partner_best_carrier'})
     )
     data_api_df = data_api_df.merge(partner_best_carrier_df,
-                                    on=['receiver_province_id', 'receiver_district_id', 'order_type_id'], how='inner')
-    data_api_df['partner_best_carrier_id'] = data_api_df['partner_best_carrier'].map(MAPPING_CARRIER_ID)
+                                    on=['receiver_province_code', 'receiver_district_code', 'new_type'], how='inner')
+    data_api_df['for_partner'] = data_api_df['partner_best_carrier'].map(MAPPING_CARRIER_ID)
 
     return data_api_df.drop(['wscore'], axis=1)
 
@@ -386,31 +386,31 @@ def out_data_final(input_df=None, carriers=ACTIVE_CARRIER, show_logs=False):
     if input_df is None:
         giao_dich_valid = pd.read_parquet(ROOT_PATH + '/processed_data/giao_dich_combine_valid.parquet')
         giao_dich_valid = giao_dich_valid[[
-            'order_id', 'weight', 'delivery_type', 'sender_province', 'sender_district',
+            'order_code', 'weight', 'pickup_type', 'sender_province', 'sender_district',
             'receiver_province', 'receiver_district'
         ]]
         focus_df = (
             giao_dich_valid.merge(
                 PROVINCE_MAPPING_DISTRICT_DF.rename(columns={
-                    'province_id': 'sender_province_id',
-                    'district_id': 'sender_district_id',
+                    'province_code': 'sender_province_code',
+                    'district_code': 'sender_district_code',
                     'province': 'sender_province',
                     'district': 'sender_district'
                 }), on=['sender_province', 'sender_district'], how='left')
                 .merge(
                 PROVINCE_MAPPING_DISTRICT_DF.rename(columns={
-                    'province_id': 'receiver_province_id',
-                    'district_id': 'receiver_district_id',
+                    'province_code': 'receiver_province_code',
+                    'district_code': 'receiver_district_code',
                     'province': 'receiver_province',
                     'district': 'receiver_district',
                 }), on=['receiver_province', 'receiver_district'], how='left')
         )
 
         focus_df = focus_df[[
-            'order_id', 'weight', 'delivery_type', 'sender_province_id', 'sender_district_id',
-            'receiver_province_id', 'receiver_district_id'
+            'order_code', 'weight', 'pickup_type', 'sender_province_code', 'sender_district_code',
+            'receiver_province_code', 'receiver_district_code'
         ]]
-        focus_df['delivery_type'] = focus_df['delivery_type'].fillna('Gửi Bưu Cục')
+        focus_df['pickup_type'] = focus_df['pickup_type'].fillna('Gửi Bưu Cục')
 
         assert len(giao_dich_valid) == len(focus_df), 'Transform data sai'
     else:
