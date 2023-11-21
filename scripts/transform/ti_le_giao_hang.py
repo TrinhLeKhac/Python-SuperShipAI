@@ -2,13 +2,13 @@ from scripts.utilities.helper import *
 from scripts.utilities.config import *
 
 
-def idx_tieu_chi_3(nvc_df, delivery_success_rate_col='modified_rate'):
+def idx_tieu_chi_3(nvc_df, modified_rate_col='modified_rate'):
     list_idx = nvc_df.index.tolist()[:10]  # top 10 after ordering
-    th1 = nvc_df.loc[list_idx[-1], delivery_success_rate_col]
+    th1 = nvc_df.loc[list_idx[-1], modified_rate_col]
     th2 = nvc_df.loc[list_idx[-1], 'total_order']
 
     extra_idx = nvc_df.loc[
-        (nvc_df[delivery_success_rate_col] == th1)
+        (nvc_df[modified_rate_col] == th1)
         & (nvc_df['total_order'] == th2)
         ].index.tolist()
 

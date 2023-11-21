@@ -28,7 +28,7 @@ class RowAPI(BaseModel):
     highest_score_carrier_id: int
     shop_best_carrier_id: int
     total_order: int
-    delivery_success_rate: float
+    rate: float
     score: float
     stars: float
 
@@ -48,7 +48,7 @@ class RowCalc(BaseModel):
     carrier_status_comment: str
     estimate_delivery_time_details: float
     estimate_delivery_time: str
-    delivery_success_rate: float
+    rate: float
     shop_best_carrier_id: int
     partner_best_carrier_id: int
     cheapest_carrier_id: int
