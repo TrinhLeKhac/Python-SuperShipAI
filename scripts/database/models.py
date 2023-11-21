@@ -15,7 +15,7 @@ class RowAPI(Base):
     estimate_delivery_time = Column(String, nullable=False)
     fastest_carrier_id = Column(Integer, nullable=False)
     highest_score_carrier_id = Column(Integer, nullable=False)
-    fshop_best_carrier_id = Column(Integer, nullable=False)
+    shop_best_carrier_id = Column(Integer, nullable=False)
     total_order = Column(Integer, nullable=False)
     delivery_success_rate = Column(Numeric(5, 2), nullable=False)
     score = Column(Numeric(3, 2), nullable=False)

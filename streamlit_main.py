@@ -201,7 +201,7 @@ if os.path.exists(ROOT_PATH + '/output/data_api.parquet'):
                     method="dense", ascending=False)
                 df_st_output['score_ranking'] = df_st_output['score_ranking'].astype(int)
 
-                fshop_best_carrier_id = df_st_output['for_fshop'].values[0]
+                shop_best_carrier_id = df_st_output['for_fshop'].values[0]
 
                 df_st_output = df_st_output[[
                     'order_code', 'carrier_id', 'new_type', 'route_type',
@@ -242,4 +242,4 @@ if os.path.exists(ROOT_PATH + '/output/data_api.parquet'):
                 else:
                     st.error('Tập dữ liệu quá khứ (dùng để tính toán) chưa có thông tin ', icon="🚨")
 
-                st.info('Nhà vận chuyển tốt nhất: ' + MAPPING_ID_CARRIER[fshop_best_carrier_id])
+                st.info('Nhà vận chuyển tốt nhất: ' + MAPPING_ID_CARRIER[shop_best_carrier_id])
