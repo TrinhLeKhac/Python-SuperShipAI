@@ -26,7 +26,7 @@ class RowAPI(BaseModel):
     estimate_delivery_time: str
     fastest_carrier_id: int
     highest_score_carrier_id: int
-    customer_best_carrier_id: int
+    fshop_best_carrier_id: int
     total_order: int
     delivery_success_rate: float
     score: float
@@ -49,7 +49,7 @@ class RowCalc(BaseModel):
     estimate_delivery_time_details: float
     estimate_delivery_time: str
     delivery_success_rate: float
-    customer_best_carrier_id: int
+    fshop_best_carrier_id: int
     partner_best_carrier_id: int
     cheapest_carrier_id: int
     fastest_carrier_id: int
@@ -82,20 +82,20 @@ def get_rows_by_province_code(province_code: str = '01'):
 
 @app.get("/v1/calculation/", response_model=List[RowCalc], status_code=200)
 def calculate(
-        order_code: str, weight: int, delivery_type_id: int,
+        order_code: str, weight: int, pickup_type_id: int,
         sender_province_code: str, sender_district_code: str,
         receiver_province_code: str, receiver_district_code: str
 ):
-    delivery_type = None
-    if delivery_type_id == 0:
-        delivery_type = 'Gửi Bưu Cục'
-    elif delivery_type_id == 1:
-        delivery_type = 'Lấy Tận Nơi'
+    pickup_type = None
+    if pickup_type_id == 0:
+        pickup_type = 'Gửi Bưu Cục'
+    elif pickup_type_id == 1:
+        pickup_type = 'Lấy Tận Nơi'
 
     df_input = pd.DataFrame(data={
         'order_code': [order_code],
         'weight': [weight],
-        'pickup_type': [delivery_type],
+        'pickup_type': [pickup_type],
         'sender_province_code': [sender_province_code],
         'sender_district_code': [sender_district_code],
         'receiver_province_code': [receiver_province_code],

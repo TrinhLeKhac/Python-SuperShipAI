@@ -16,7 +16,7 @@ API_FULL_COLS = [
     'weight', 'price', 'pickup_type',
     'status', 'description',
     'time_data', 'time_display',
-    'rate', 'delivery_success_ranking',
+    'rate', 'rate_ranking',
     'for_fshop', 'shop_best_carrier',
     'for_partner', 'partner_best_carrier', 'score', 'stars',
     'price_ranking', 'speed_ranking', 'score_ranking',
@@ -187,7 +187,7 @@ def combine_info_from_api(input_df, show_logs=False):
                 'time_data', 'time_display',
                 'shop_best_carrier', 'for_fshop',
                 'speed_ranking', 'score_ranking',
-                'delivery_success_ranking', 'rate',
+                'rate_ranking', 'rate',
                 'score', 'stars', 'total_order',
             ]], on=['receiver_province_code', 'receiver_district_code', 'carrier_id', 'new_type'], how='left'
         )
@@ -366,7 +366,7 @@ def partner_best_carrier_old(data_api_df, threshold=15):
 
 
 def partner_best_carrier(data_api_df):
-    data_api_df['wscore'] = data_api_df['price_ranking'] * 1.4 + data_api_df['delivery_success_ranking'] * 1.2 + \
+    data_api_df['wscore'] = data_api_df['price_ranking'] * 1.4 + data_api_df['rate_ranking'] * 1.2 + \
                             data_api_df['score_ranking']
     partner_best_carrier_df = (
         data_api_df.sort_values([

@@ -26,7 +26,7 @@ def round_value(x):
         return '{} - {} ngày'.format(round_05 + 0.5, round_05 + 1)
 
 
-def customer_best_carrier_old(data_api_df, threshold=15):
+def fshop_best_carrier_old(data_api_df, threshold=15):
     df1 = data_api_df.loc[data_api_df['total_order'] > threshold]
     df2 = data_api_df.loc[(data_api_df['total_order'] >= 1) & (data_api_df['total_order'] <= threshold)]
     df3 = data_api_df.loc[data_api_df['total_order'] == 0]
@@ -46,27 +46,27 @@ def customer_best_carrier_old(data_api_df, threshold=15):
     group3 = df3[['receiver_province', 'receiver_district', 'order_type']].drop_duplicates()
     group3['shop_best_carrier'] = SHOP_BEST_CARRIER_DEFAULT
 
-    customer_best_carrier_df = pd.concat([group1, group2, group3]).drop_duplicates(
+    fshop_best_carrier_df = pd.concat([group1, group2, group3]).drop_duplicates(
         ['receiver_province', 'receiver_district', 'order_type'], keep='first')
 
-    return customer_best_carrier_df
+    return fshop_best_carrier_df
 
 
-def customer_best_carrier(data_api_df):
+def fshop_best_carrier(data_api_df):
     data_api_df['combine_col'] = data_api_df[['rate', "total_order"]].apply(tuple, axis=1)
-    data_api_df['delivery_success_ranking'] = \
+    data_api_df['rate_ranking'] = \
         data_api_df.groupby(['receiver_province_code', 'receiver_district_code', 'new_type'])["combine_col"].rank(
             method="dense", ascending=False).astype(int)
-    data_api_df['wscore'] = data_api_df['speed_ranking'] * 1.4 + data_api_df['delivery_success_ranking'] * 1.2 + \
+    data_api_df['wscore'] = data_api_df['speed_ranking'] * 1.4 + data_api_df['rate_ranking'] * 1.2 + \
                             data_api_df['score_ranking']
-    customer_best_carrier_df = (
+    fshop_best_carrier_df = (
         data_api_df.sort_values([
             'receiver_province_code', 'receiver_district_code', 'new_type', 'wscore'
         ]).drop_duplicates(['receiver_province_code', 'receiver_district_code', 'new_type'])
         [['receiver_province_code', 'receiver_district_code', 'new_type', 'carrier']]
             .rename(columns={'carrier': 'shop_best_carrier'})
     )
-    data_api_df = data_api_df.merge(customer_best_carrier_df,
+    data_api_df = data_api_df.merge(fshop_best_carrier_df,
                                     on=['receiver_province_code', 'receiver_district_code', 'new_type'], how='inner')
     data_api_df['for_fshop'] = data_api_df['shop_best_carrier'].map(MAPPING_CARRIER_ID)
 
@@ -240,8 +240,8 @@ def out_data_api(return_full_cols_df=False, show_logs=True):
     api_data_final['score_ranking'] = api_data_final['score_ranking'].astype(int)
 
     if show_logs:
-        print('8. Thông tin customer_best_carrier')
-    api_data_final = customer_best_carrier(api_data_final)
+        print('8. Thông tin fshop_best_carrier')
+    api_data_final = fshop_best_carrier(api_data_final)
 
     if show_logs:
         print('9. Thông tin số sao đánh giá của khách hàng')
@@ -260,7 +260,7 @@ def out_data_api(return_full_cols_df=False, show_logs=True):
             'time_data', 'time_display',
             'shop_best_carrier', 'for_fshop',
             'speed_ranking', 'score_ranking',
-            'total_order', 'delivery_success_ranking',
+            'total_order', 'rate_ranking',
             'rate', 'score', 'stars',
         ]]
         return api_data_final
@@ -270,7 +270,7 @@ def out_data_api(return_full_cols_df=False, show_logs=True):
             'carrier_id', 'new_type', 'status', 'description',
             'time_data', 'time_display',
             'speed_ranking', 'score_ranking',
-            'for_fshop', 'total_order', 'delivery_success_ranking',
+            'for_fshop', 'total_order', 'rate_ranking',
             'rate', 'score', 'stars',
         ]]
         if show_logs:

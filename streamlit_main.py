@@ -165,7 +165,7 @@ if os.path.exists(ROOT_PATH + '/output/data_api.parquet'):
                 )
                 opt_receiver_district_code = pro_dis_df.loc[pro_dis_df['district'] == opt_receiver_district]['district_code'].values[0]
 
-            carrier_id, delivery_type = st.columns(2)
+            carrier_id, pickup_type = st.columns(2)
             with carrier_id:
                 opt_carriers = st.multiselect(
                     "Chọn nhà vận chuyển",
@@ -173,8 +173,8 @@ if os.path.exists(ROOT_PATH + '/output/data_api.parquet'):
                     key='carrier_id'
                 )
                 # option_carriers_id = [int(re.findall(r'\d+', opt)[0]) for opt in opt_carriers]
-            with delivery_type:
-                opt_delivery_type = st.selectbox(
+            with pickup_type:
+                opt_pickup_type = st.selectbox(
                     "Chọn loại vận chuyển",
                     options=('Nội Miền', 'Cận Miền', 'Cách Miền', 'Nội Thành Tỉnh', 'Ngoại Thành Tỉnh', 'Nội Thành Tp.HCM - HN', 'Ngoại Thành Tp.HCM - HN'),
                     key='pickup_type'
@@ -185,7 +185,7 @@ if os.path.exists(ROOT_PATH + '/output/data_api.parquet'):
                 df_input = pd.DataFrame(data={
                     'order_code': [order_code],
                     'weight': [weight],
-                    'pickup_type': [opt_delivery_type],
+                    'pickup_type': [opt_pickup_type],
                     'sender_province_code': [opt_sender_province_code],
                     'sender_district_code': [opt_sender_district_code],
                     'receiver_province_code': [opt_receiver_province_code],
@@ -201,7 +201,7 @@ if os.path.exists(ROOT_PATH + '/output/data_api.parquet'):
                     method="dense", ascending=False)
                 df_st_output['score_ranking'] = df_st_output['score_ranking'].astype(int)
 
-                customer_best_carrier_id = df_st_output['for_fshop'].values[0]
+                fshop_best_carrier_id = df_st_output['for_fshop'].values[0]
 
                 df_st_output = df_st_output[[
                     'order_code', 'carrier_id', 'new_type', 'route_type',
@@ -242,4 +242,4 @@ if os.path.exists(ROOT_PATH + '/output/data_api.parquet'):
                 else:
                     st.error('Tập dữ liệu quá khứ (dùng để tính toán) chưa có thông tin ', icon="🚨")
 
-                st.info('Nhà vận chuyển tốt nhất: ' + MAPPING_ID_CARRIER[customer_best_carrier_id])
+                st.info('Nhà vận chuyển tốt nhất: ' + MAPPING_ID_CARRIER[fshop_best_carrier_id])
