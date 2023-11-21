@@ -8,7 +8,7 @@ from scripts.api.out_data_final import *
 
 app = FastAPI(
     title="API SUPERSHIP", description="This is an API get calculation result from history transaction of SUPERSHIP",
-    docs_url="/api"
+    docs_url="/"
 )
 
 db = session()
@@ -19,14 +19,14 @@ class RowAPI(BaseModel):
     receiver_province_code: str
     receiver_district_code: str
     carrier_id: int
-    order_type_id: int
-    carrier_status: int
-    carrier_status_comment: str
-    estimate_delivery_time_details: float
-    estimate_delivery_time: str
-    fastest_carrier_id: int
-    highest_score_carrier_id: int
-    shop_best_carrier_id: int
+    new_type: int
+    status: int
+    description: str
+    time_data: float
+    time_display: str
+    speed_ranking: int
+    score_ranking: int
+    for_shop: int
     total_order: int
     rate: float
     score: float
@@ -41,19 +41,19 @@ class RowAPI(BaseModel):
 class RowCalc(BaseModel):
     order_code: str
     carrier_id: int
-    order_type_id: int
-    sys_order_type_id: int
-    service_fee: int
-    carrier_status: int
-    carrier_status_comment: str
-    estimate_delivery_time_details: float
-    estimate_delivery_time: str
+    new_type: int
+    route_type: int
+    price: int
+    status: int
+    description: str
+    time_data: float
+    time_display: str
     rate: float
-    shop_best_carrier_id: int
-    partner_best_carrier_id: int
-    cheapest_carrier_id: int
-    fastest_carrier_id: int
-    highest_score_carrier_id: int
+    for_shop: int
+    for_partner: int
+    price_ranking: int
+    fast_ranking: int
+    score_ranking: int
     score: float
     stars: float
 
@@ -61,7 +61,7 @@ class RowCalc(BaseModel):
         orm_mode = True
 
 
-@app.get("/v1/output/", response_model=List[RowAPI], status_code=status.HTTP_200_OK)
+@app.get("/api/v1/output/", response_model=List[RowAPI], status_code=status.HTTP_200_OK)
 def get_all_rows(batch: int = 100):
     rows = db.query(models.RowAPI).limit(batch).all()
     if rows is None:
@@ -69,7 +69,7 @@ def get_all_rows(batch: int = 100):
     return rows
 
 
-@app.get("/v1/output/province/", response_model=List[RowAPI], status_code=status.HTTP_200_OK)
+@app.get("/api/v1/output/province/", response_model=List[RowAPI], status_code=status.HTTP_200_OK)
 def get_rows_by_province_code(province_code: str = '01'):
     rows = (
         db.query(models.RowAPI)
@@ -80,7 +80,7 @@ def get_rows_by_province_code(province_code: str = '01'):
     return rows
 
 
-@app.get("/v1/calculation/", response_model=List[RowCalc], status_code=200)
+@app.get("/api/v1/calculation/", response_model=List[RowCalc], status_code=200)
 def calculate(
         order_code: str, weight: int, pickup_type_id: int,
         sender_province_code: str, sender_district_code: str,
@@ -136,16 +136,3 @@ def calculate(
         final_list.append(RowCalc(**result_dict))
 
     return final_list
-
-
-def main():
-    """
-    Entry point for running the FastAPI application.
-    Use the following command to run the application:
-    uvicorn api_main:app --reload
-    """
-    uvicorn.run(app, host="127.0.0.1", port=8000, reload=True)
-
-
-if __name__ == "__main__":
-    main()
