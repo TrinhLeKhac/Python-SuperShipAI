@@ -52,7 +52,7 @@ class RowCalc(BaseModel):
     for_shop: int
     for_partner: int
     price_ranking: int
-    fast_ranking: int
+    speed_ranking: int
     score_ranking: int
     score: float
     stars: float
@@ -106,7 +106,7 @@ def calculate(
         'order_code', 'carrier_id', 'new_type', 'route_type',
         'price', 'status', 'description',
         'time_data', 'time_display', 'rate',
-        'for_fshop', 'for_partner',
+        'for_shop', 'for_partner',
         'price_ranking', 'speed_ranking', 'score_ranking',
         'score', 'stars',
     ]]
@@ -124,7 +124,7 @@ def calculate(
             'time_data': df_output.loc[i, :]['time_data'],
             'time_display': df_output.loc[i, :]['time_display'],
             'rate': df_output.loc[i, :]['rate'],
-            'for_fshop': df_output.loc[i, :]['for_fshop'],
+            'for_shop': df_output.loc[i, :]['for_shop'],
             'for_partner': df_output.loc[i, :]['for_partner'],
             'price_ranking': df_output.loc[i, :]['price_ranking'],
             'speed_ranking': df_output.loc[i, :]['speed_ranking'],

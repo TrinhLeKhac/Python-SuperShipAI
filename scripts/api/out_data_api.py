@@ -68,7 +68,7 @@ def shop_best_carrier(data_api_df):
     )
     data_api_df = data_api_df.merge(shop_best_carrier_df,
                                     on=['receiver_province_code', 'receiver_district_code', 'new_type'], how='inner')
-    data_api_df['for_fshop'] = data_api_df['shop_best_carrier'].map(MAPPING_CARRIER_ID)
+    data_api_df['for_shop'] = data_api_df['shop_best_carrier'].map(MAPPING_CARRIER_ID)
 
     return data_api_df.drop(['combine_col', 'wscore'], axis=1)
 
@@ -258,7 +258,7 @@ def out_data_api(return_full_cols_df=False, show_logs=True):
             'receiver_province_code', 'receiver_province', 'receiver_district_code', 'receiver_district',
             'carrier_id', 'carrier', 'order_type', 'new_type', 'status', 'description',
             'time_data', 'time_display',
-            'shop_best_carrier', 'for_fshop',
+            'shop_best_carrier', 'for_shop',
             'speed_ranking', 'score_ranking',
             'total_order', 'rate_ranking',
             'rate', 'score', 'stars',
@@ -270,7 +270,7 @@ def out_data_api(return_full_cols_df=False, show_logs=True):
             'carrier_id', 'new_type', 'status', 'description',
             'time_data', 'time_display',
             'speed_ranking', 'score_ranking',
-            'for_fshop', 'total_order', 'rate_ranking',
+            'for_shop', 'total_order', 'rate_ranking',
             'rate', 'score', 'stars',
         ]]
         if show_logs:

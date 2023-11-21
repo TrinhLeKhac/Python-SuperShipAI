@@ -201,13 +201,13 @@ if os.path.exists(ROOT_PATH + '/output/data_api.parquet'):
                     method="dense", ascending=False)
                 df_st_output['score_ranking'] = df_st_output['score_ranking'].astype(int)
 
-                shop_best_carrier_id = df_st_output['for_fshop'].values[0]
+                shop_best_carrier_id = df_st_output['for_shop'].values[0]
 
                 df_st_output = df_st_output[[
                     'order_code', 'carrier_id', 'new_type', 'route_type',
                     'price', 'status', 'description',
                     'time_data', 'time_display', 'rate',
-                    # 'for_fshop', 'for_partner',
+                    # 'for_shop', 'for_partner',
                     'price_ranking', 'speed_ranking', 'score_ranking',
                     'score', 'stars',
                 ]]

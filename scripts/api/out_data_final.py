@@ -17,7 +17,7 @@ API_FULL_COLS = [
     'status', 'description',
     'time_data', 'time_display',
     'rate', 'rate_ranking',
-    'for_fshop', 'shop_best_carrier',
+    'for_shop', 'shop_best_carrier',
     'for_partner', 'partner_best_carrier', 'score', 'stars',
     'price_ranking', 'speed_ranking', 'score_ranking',
 ]
@@ -25,7 +25,7 @@ API_COLS = [
     'order_code', 'carrier_id', 'new_type', 'route_type', 'price',
     'status', 'description',
     'time_data', 'time_display', 'rate',
-    'for_fshop', 'for_partner', 'score', 'stars',
+    'for_shop', 'for_partner', 'score', 'stars',
     'price_ranking', 'speed_ranking', 'score_ranking',
 ]
 
@@ -185,7 +185,7 @@ def combine_info_from_api(input_df, show_logs=False):
                 'receiver_province_code', 'receiver_district_code', 'carrier_id', 'new_type',
                 'status', 'description',
                 'time_data', 'time_display',
-                'shop_best_carrier', 'for_fshop',
+                'shop_best_carrier', 'for_shop',
                 'speed_ranking', 'score_ranking',
                 'rate_ranking', 'rate',
                 'score', 'stars', 'total_order',
