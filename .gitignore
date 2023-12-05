@@ -1,0 +1,8 @@
+/input
+/processed_data
+/output
+/.idea
+*.pyc
+*.xml
+/venv
+**/__pycache__/
