@@ -13,7 +13,7 @@ reusable_oauth2 = HTTPBearer(
 )
 
 
-def validate_token(http_authorization_credentials=Depends(reusable_oauth2)) -> dict[str, bool | str | list[Any]] | Any:
+def validate_token(http_authorization_credentials=Depends(reusable_oauth2)):
     """
     Decode JWT token to get username => return username
     """
